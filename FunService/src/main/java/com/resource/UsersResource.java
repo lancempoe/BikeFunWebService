@@ -1,7 +1,5 @@
 package com.resource;
 
-import java.util.ArrayList;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,8 +10,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.dao.UsersDao;
-import com.google.gson.Gson;
-import com.model.Users;
+import com.model.Fun;
+import com.model.User;
 
 @Path("/users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,12 +20,12 @@ public class UsersResource {
 
 	@POST
 	@Path("/new")
-	public Response newUser(Users userObject) {
+	public Response newUser(User user) {
 		try {
-			System.out.println("Received PUT XML/JSON Request: " + userObject.toString());
+			System.out.println("Received PUT XML/JSON Request: " + user.toString());
 
 			UsersDao userDao = new UsersDao();
-			Response response = userDao.NewUser(userObject);
+			Response response = userDao.NewUser(user);
 			return response;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -37,34 +35,28 @@ public class UsersResource {
 
 	@GET
 	@Path("{id}")
-	public String getUser(@PathParam("id") int id) {
-		String users = null;
+	public User getUser(@PathParam("id") int id) {
+		User user = null;
 		try 
 		{
-			ArrayList<Users> userObjects = null;
 			UsersDao userDao = new UsersDao();
-			userObjects = userDao.GetUser(id);
-			Gson gson = new Gson();
-			users = gson.toJson(userObjects);
-			System.out.println(users);
+			user = userDao.GetUser(id);
+			System.out.println(user);
 		}
 		catch (Exception e)
 		{
 			System.out.println("Exception Error: " + e.getMessage()); 
 		}
-		return users;
+		return user;
 	}
 
 	@GET
-	public String getUsers() {
-		String users = null;
+	public Fun getUsers() {
+		Fun users = null;
 		try 
 		{
-			ArrayList<Users> userObjects = null;
 			UsersDao userDao = new UsersDao();
-			userObjects = userDao.GetUsers();
-			Gson gson = new Gson();
-			users = gson.toJson(userObjects);
+			users = userDao.GetUsers();
 			System.out.println(users);
 		}
 		catch (Exception e)

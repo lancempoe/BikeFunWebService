@@ -10,10 +10,10 @@ public class Database {
 	{
 		try
 		{
-			String connectionURL = "jdbc:mysql://localhost:3306/DBName";
+			String connectionURL = "jdbc:mysql://localhost:3306/Fun";
 			Connection connection = null;
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			connection = DriverManager.getConnection(connectionURL, "DB_ID", "");
+			connection = DriverManager.getConnection(connectionURL, "FunService", "");
 			return connection;
 		}
 		catch (SQLException e)
