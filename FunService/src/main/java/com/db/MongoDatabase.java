@@ -20,11 +20,6 @@ public abstract class MongoDatabase {
 	};
 
 	/**
-	 * TODO Authentication for MongoDB is not turned on.
-	 * http://docs.mongodb.org/
-	 * manual/tutorial/control-access-to-mongodb-with-authentication/ It is said
-	 * thought that most run without authentication in a secure environment.
-	 * 
 	 * @return
 	 * @throws Exception
 	 */

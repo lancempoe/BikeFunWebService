@@ -28,7 +28,8 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 
 	private static final Logger LOG = Logger.getLogger(TestBikeRideResource.class.getCanonicalName());
 	protected static final String WEB_APP_NAME = "FunService";
-	protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME;
+	//protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
+	protected static final String BASE_URI = "http://24.21.204.4/" + WEB_APP_NAME; //Test
 	protected static final String REST_URI = BASE_URI + "/" + "rest";
 
 	//Used with testing
@@ -67,8 +68,6 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 
 		assertTrue(ClientResponse.Status.OK.getStatusCode() == response.getStatus());
 	}
-
-	//TODO STILL IN PROGRESS
 
 	@Test
 	public void testFunServiceGetBikeRides() {
