@@ -22,6 +22,7 @@ import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.BikeRide;
+import com.model.GeoLoc;
 import com.model.Root;
 
 /**
@@ -140,7 +141,7 @@ public class BikeRidesResource {
 			//Get the objects using Jongo
 			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
 			MongoCollection collection = jongo.getCollection(MONGO_COLLECTIONS.BIKERIDES.name());
-			Iterable<BikeRide> all = collection.find().fields("{_id: 1, BikeRideName:1, TargetAudience:1, ImagePath:1").as(BikeRide.class);		
+			Iterable<BikeRide> all = collection.find().fields("{_id: 1, BikeRideName: 1, TargetAudience: 1, ImagePath: 1}").as(BikeRide.class);
 			ArrayList<BikeRide> bikeRideList = Lists.newArrayList(all);
 			root = new Root();
 			root.BikeRides = bikeRideList;
@@ -149,24 +150,23 @@ public class BikeRidesResource {
 		{
 			LOG.log(Level.SEVERE, "Exception Error: " + e.getMessage());
 			e.printStackTrace();
+			throw e;
 		} 
 		return root;
 	}
 	
-	@GET
-	@Path("sortBydistance/{longitude},{latitude}/{maxDistance}")
-	public Root getBikeRidesSortedByDistance(@PathParam("longitude") Double longitude, 
-												@PathParam("latitude") Double latitude, 
-												@PathParam("maxDistance") Double maxDistance) throws Exception {
+	@POST
+	@Path("sortBydistance/{maxDistance}")
+	public Root getBikeRidesSortedByDistance(GeoLoc geoLoc, @PathParam("maxDistance") Double maxDistance) throws Exception {
 		if (maxDistance <= 0) { throw new Exception("Positive Max Distance only"); }
 		
-		return SortedByDistance("{address: {$near: ["+longitude+", "+latitude+"], $maxDistance: "+maxDistance+"}}");
+		return SortedByDistance("{GeoLoc: {$near: ["+geoLoc.Longitude+", "+geoLoc.Latitude+"], $maxDistance: "+maxDistance+"}}");
 	}
 	
-	@GET
-	@Path("sortBydistance/{longitude},{latitude}")
-	public Root getBikeRidesSortedByDistance(@PathParam("longitude") Double longitude, @PathParam("latitude") Double latitude) throws Exception {
-		return SortedByDistance("{address: {$near: ["+longitude+", "+latitude+"]");
+	@POST
+	@Path("sortBydistance")
+	public Root getBikeRidesSortedByDistance(GeoLoc geoLoc) throws Exception {
+		return SortedByDistance("{GeoLoc: {$near: ["+geoLoc.Longitude+", "+geoLoc.Latitude+"]}}");
 	}
 	
 	/**

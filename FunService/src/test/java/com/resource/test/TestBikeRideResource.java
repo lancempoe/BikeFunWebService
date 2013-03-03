@@ -60,7 +60,6 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 		bikeRide.setGeoLoc(geoLoc);
 
 		TestBikeRideResource.bikeRideName = bikeRide.getBikeRideName();
-		TestBikeRideResource.startTime = bikeRide.getStartTime();
 
 		ClientResponse response = webResource
 				.path("bikerides/new")
@@ -90,7 +89,7 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 		LOG.fine(usersAsJson);
 
 		assertNotNull(TestBikeRideResource.bikeRideID);
-		assertTrue(TestBikeRideResource.startTime.equals(root.BikeRides.get(root.BikeRides.size()-1).getStartTime()));
+		assertEquals(TestBikeRideResource.bikeRideName, root.BikeRides.get(root.BikeRides.size()-1).getBikeRideName());
 	}
 
 	@Test
@@ -120,11 +119,14 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 		//Top entry
 		//latitude: 45.4793;
 		//Longitude = -122.6890;
+		GeoLoc geoLoc = new GeoLoc();
+		geoLoc.Latitude = 45.7793;
+		geoLoc.Longitude = -122.4890;
 
 		Root root = webResource
-				.path("bikerides/45.7793,-122.4890")
+				.path("bikerides/sortBydistance")
 				.type("application/json")
-				.get(Root.class);
+				.post(Root.class, geoLoc);
 
 		Gson gson = new Gson();
 		String usersAsJson = gson.toJson(root);
@@ -140,11 +142,14 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 		//Top entry
 		//latitude: 45.4793;
 		//Longitude = -122.6890;
-
+		GeoLoc geoLoc = new GeoLoc();
+		geoLoc.Latitude = 45.7793;
+		geoLoc.Longitude = -122.4890;
+		
 		Root root = webResource
-				.path("bikerides/45.7793,-122.4890,1")
+				.path("bikerides/sortBydistance/1")
 				.type("application/json")
-				.get(Root.class);
+				.post(Root.class, geoLoc);
 
 		Gson gson = new Gson();
 		String usersAsJson = gson.toJson(root);

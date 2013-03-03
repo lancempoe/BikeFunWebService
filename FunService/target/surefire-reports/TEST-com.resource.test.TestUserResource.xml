@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite failures="0" time="1.343" errors="0" skipped="0" tests="4" name="com.resource.test.TestUserResource">
+<testsuite failures="0" time="1.36" errors="0" skipped="0" tests="4" name="com.resource.test.TestUserResource">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Libraries"/>
@@ -64,8 +64,8 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase time="0.763" classname="com.resource.test.TestUserResource" name="testFunServiceNewUser"/>
-  <testcase time="0.335" classname="com.resource.test.TestUserResource" name="testFunServiceGetUsers"/>
-  <testcase time="0.104" classname="com.resource.test.TestUserResource" name="testFunServiceGetUser"/>
-  <testcase time="0.098" classname="com.resource.test.TestUserResource" name="testFunServiceDeleteUser"/>
+  <testcase time="0.803" classname="com.resource.test.TestUserResource" name="testFunServiceNewUser"/>
+  <testcase time="0.322" classname="com.resource.test.TestUserResource" name="testFunServiceGetUsers"/>
+  <testcase time="0.108" classname="com.resource.test.TestUserResource" name="testFunServiceGetUser"/>
+  <testcase time="0.091" classname="com.resource.test.TestUserResource" name="testFunServiceDeleteUser"/>
 </testsuite>
