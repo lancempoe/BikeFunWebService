@@ -39,7 +39,9 @@ public abstract class MongoDatabase {
 
 	public static DB Get_DB() throws Exception {
 		DB db;
-} catch (Exception e) {
+		try {
+			db = mongoClient.getDB(DB_NAME);
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
