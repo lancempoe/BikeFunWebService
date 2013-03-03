@@ -34,7 +34,6 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 	//Used with testing
 	private static String bikeRideID;
 	private static String bikeRideName;
-	private static Date startTime;
 
 	protected ClientConfig getDefaultClientConfig() {
 		ClientConfig cc = new DefaultClientConfig();
@@ -70,7 +69,7 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 	}
 
 	//TODO STILL IN PROGRESS
-	
+
 	@Test
 	public void testFunServiceGetBikeRides() {
 		Client client = Client.create(getDefaultClientConfig());
@@ -145,7 +144,7 @@ public class TestBikeRideResource extends TestCase { //extends JerseyTest {
 		GeoLoc geoLoc = new GeoLoc();
 		geoLoc.Latitude = 45.7793;
 		geoLoc.Longitude = -122.4890;
-		
+
 		Root root = webResource
 				.path("bikerides/sortBydistance/1")
 				.type("application/json")
