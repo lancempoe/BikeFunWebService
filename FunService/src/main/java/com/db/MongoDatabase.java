@@ -39,7 +39,6 @@ public abstract class MongoDatabase {
 
 	public static DB Get_DB() throws Exception {
 		DB db;
-        System.out.println("Testing commit");
 		try {
 			db = mongoClient.getDB(DB_NAME);
 		} catch (Exception e) {
