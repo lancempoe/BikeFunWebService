@@ -9,12 +9,6 @@
 	<url>http://lance-poehlers-macbook-pro.local:8080</url>
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
 			<version>1.12</version>
@@ -45,11 +39,6 @@
 			<version>1.12</version>
 		</dependency>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.23</version>
-		</dependency>
-		<dependency>
 			<groupId>com.sun.jersey.samples</groupId>
 			<artifactId>json-from-jaxb</artifactId>
 			<version>1.12</version>
@@ -74,6 +63,27 @@
 			<artifactId>gson</artifactId>
 			<version>2.2.1</version>
 		</dependency>
+		<!-- MongDB java driver to hook up to MongoDB server -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>bson</artifactId>
+			<version>2.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jongo</groupId>
+			<artifactId>jongo</artifactId>
+			<version>0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>13.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>2.10.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>FunService</finalName>
@@ -85,4 +95,5 @@
 			</plugin>
 		</plugins>
 	</build>
+	<!-- Environment Settings -->                                        
 </project>
