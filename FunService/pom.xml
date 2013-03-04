@@ -6,7 +6,7 @@
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Jersey Maven Fun Webapp</name>
-	<url>http://lance-poehlers-macbook-pro.local:8080</url>
+	<url>http://localhost:8080</url>
 	<dependencies>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
