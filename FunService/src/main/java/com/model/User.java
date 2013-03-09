@@ -19,7 +19,7 @@ public class User {
 	private String Password;
 	private String Email;
 	private boolean AccountActivated;
-	private String ImagePath; //TODO Need to test putting the actual image in the DB vs external of DB.  http://stackoverflow.com/questions/4245787/how-to-insert-images-in-mongodb-using-java
+	private String ImagePath = "Images/Users/defaultUser.jpg"; //In the event that no image is provided.
 	@XmlJavaTypeAdapter( DateAdapter.class)
 	private Date JoinedTimeStamp; //Defaulting with a Date of now.
 	private int HostedBikeRideCount;

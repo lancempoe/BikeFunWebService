@@ -15,7 +15,7 @@ public class DateAdapter extends XmlAdapter<String, Date> {
 	private static final String ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS zzz";
 	private static final TimeZone utc = TimeZone.getTimeZone("UTC");
 	private SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_FORMAT);
-	
+
 
 	@Override
 	public String marshal(Date v) throws Exception {

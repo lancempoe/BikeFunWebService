@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.bson.types.ObjectId;
-import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 
 import com.db.MongoDatabase;
@@ -48,10 +47,9 @@ public class UsersResource {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. New User request");
 
 			//Get the object using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection usersCollection = jongo.getCollection(MONGO_COLLECTIONS.USERS.name());
+			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
 			usersCollection.save(user);
-			
+
 			//TODO SEND OUT A EMAIL FOR THE NEW USER
 
 			response = Response.status(Response.Status.OK).build();
@@ -74,8 +72,7 @@ public class UsersResource {
 			//Then only up the fields we want to update.
 
 			//Get the object using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection usersCollection = jongo.getCollection(MONGO_COLLECTIONS.USERS.name());
+			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
 			usersCollection.save(user);
 
 			//TODO SEND OUT A EMAIL FOR THE updates.  Do we want to do this?  maybe..
@@ -97,8 +94,7 @@ public class UsersResource {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Delete User request: \"" + userId + "\"");
 
 			//Delete the user using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection usersCollection = jongo.getCollection(MONGO_COLLECTIONS.USERS.name());
+			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
 			usersCollection.remove(new ObjectId(userId));
 
 			//TODO SEND OUT EMAIL TO LET THE USER KNOW
@@ -119,8 +115,7 @@ public class UsersResource {
 		try 
 		{			
 			//Get the object using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection usersCollection = jongo.getCollection(MONGO_COLLECTIONS.USERS.name());
+			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
 			user = usersCollection.findOne(new ObjectId(userId)).fields("{Password: 0}").as(User.class);
 		}
 		catch (Exception e)
@@ -138,8 +133,7 @@ public class UsersResource {
 		try 
 		{
 			//Get the objects using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection usersCollection = jongo.getCollection(MONGO_COLLECTIONS.USERS.name());
+			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
 			Iterable<User> all = usersCollection.find().fields("{Password: 0}").as(User.class);		
 			ArrayList<User> userList = Lists.newArrayList(all);
 			root = new Root();

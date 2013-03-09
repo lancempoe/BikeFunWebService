@@ -16,20 +16,34 @@ public abstract class MongoDatabase {
 	private static final String DB_NAME = "Fun";
 
 	public static enum MONGO_COLLECTIONS {
-		USERS, BIKERIDES
+		BIKERIDES, LOCATIONS, TRACKING, USERS
 	};
 
 	/**
+	 * Most none Geo db cals.
+	 * @param collection
 	 * @return
 	 * @throws Exception
 	 */
-	public static MongoCollection Get_DB_Collection(MONGO_COLLECTIONS collection, String GeospacialIndex)
+	public static MongoCollection Get_DB_Collection(MONGO_COLLECTIONS collection)
+			throws Exception {
+		return Get_DB_Collection(collection, false);
+	}
+
+	/**
+	 * 
+	 * @param collection
+	 * @param geoLoc
+	 * @return
+	 * @throws Exception
+	 */
+	public static MongoCollection Get_DB_Collection(MONGO_COLLECTIONS collection, boolean geoLoc)
 			throws Exception {
 		MongoCollection coll;
 		try {
 			Jongo jongo = new Jongo(mongoClient.getDB(DB_NAME));
 			coll = jongo.getCollection(collection.name());
-			coll.ensureIndex("{"+ GeospacialIndex +": '2d'}");
+			if (geoLoc) { coll.ensureIndex("{GeoLoc: '2d'}"); }
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;

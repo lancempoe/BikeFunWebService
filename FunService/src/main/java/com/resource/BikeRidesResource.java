@@ -1,6 +1,5 @@
 package com.resource;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.bson.types.ObjectId;
-import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 
 import com.db.MongoDatabase;
@@ -23,9 +21,13 @@ import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.BikeRide;
 import com.model.GeoLoc;
+import com.model.Location;
 import com.model.Root;
+import com.tools.GeoLocationHelper;
 
 /**
+ * Mongo with Jongo!
+ * 
  * See: http://jongo.org
  * 	NOTE: Field selection aka. partial loading is not written as in Mongo shell: 
  * 	Jongo exposes a fields(..) method. A json selector must be provided: 
@@ -43,30 +45,56 @@ public class BikeRidesResource {
 
 	@POST
 	@Path("new")
-	public Response neBikeRide(BikeRide bikeRide) {
+	public Response newBikeRide(BikeRide bikeRide) throws Exception {
 		Response response;
 		try {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. New BikeRide request");
 
-			//Get the object using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection collection = jongo.getCollection(MONGO_COLLECTIONS.BIKERIDES.name());
-			collection.save(bikeRide);
+			//Validate real address:
+			if (GeoLocationHelper.setGeoLocation(bikeRide.getLocation())) { //Call API for ride geoCodes
 
-			//TODO SEND OUT A EMAIL FOR THE NEW bike ride to the owner?? Do we want this?
+				//Check is current city exist
+				MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
+				Location location = locationCollection
+						.findOne("{City:#, State:#, Country:#}", 
+								bikeRide.getLocation().getCity(), bikeRide.getLocation().getState(), bikeRide.getLocation().getCountry())
+						.as(Location.class);
+				if (location == null) {
+					//Add new location to the DB
+					location = new Location();
+					location.setCity(bikeRide.getLocation().getCity());
+					location.setState(bikeRide.getLocation().getState());
+					location.setCountry(bikeRide.getLocation().getCountry());
+					GeoLocationHelper.setGeoLocation(location); //Call API for city center geoCode
+					MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
+					collection.save(location);
+				}
+				bikeRide.setCityLocationId(location.getId());
 
-			response = Response.status(Response.Status.OK).build();
+				//Get the object using Jongo
+				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
+				collection.save(bikeRide);
+
+				//TODO SEND OUT A EMAIL FOR THE NEW bike ride to the owner?? 
+
+				response = Response.status(Response.Status.OK).build();
+			} else { 
+				//Invalid address
+				response = Response.status(Response.Status.CONFLICT).build();
+			}
+
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE,  e.getMessage());
+			LOG.log(Level.SEVERE, e.getMessage());
 			e.printStackTrace();
 			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+			throw e;
 		}
 		return response;
 	}
 
 	@POST
 	@Path("{id}/update")
-	public Response updateUser(BikeRide bikeRide) {
+	public Response updateBikeRide(BikeRide bikeRide) {
 		Response response;
 		try {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Update BikeRide request");
@@ -75,11 +103,8 @@ public class BikeRidesResource {
 			//Then only up the fields we want to update.
 
 			//Get the object using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection collection = jongo.getCollection(MONGO_COLLECTIONS.BIKERIDES.name());
+			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 			collection.save(bikeRide);
-
-			//TODO SEND OUT A EMAIL FOR THE updates.  Do we want to do this?  how about people watching the event??
 
 			response = Response.status(Response.Status.OK).build();
 		} catch (Exception e) {
@@ -92,17 +117,14 @@ public class BikeRidesResource {
 
 	@DELETE
 	@Path("{id}/delete")
-	public Response deleteUser(@PathParam("id") String id) throws Exception {
+	public Response deleteBikeRide(@PathParam("id") String id) throws Exception {
 		Response response;
 		try {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Delete BikeRide request: \"" + id + "\"");
 
 			//Delete the user using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection collection = jongo.getCollection(MONGO_COLLECTIONS.BIKERIDES.name());
+			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 			collection.remove(new ObjectId(id));
-
-			//TODO SEND OUT EMAIL TO LET THE leader KNOW... maybe??
 
 			response = Response.status(Response.Status.OK).build();
 		} catch (Exception e) {
@@ -115,13 +137,12 @@ public class BikeRidesResource {
 
 	@GET
 	@Path("{id}")
-	public BikeRide getUser(@PathParam("id") String id) throws Exception {
+	public BikeRide getBikeRide(@PathParam("id") String id) throws Exception {
 		BikeRide bikeRide = null;
 		try 
 		{			
 			//Get the object using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection collection = jongo.getCollection(MONGO_COLLECTIONS.BIKERIDES.name());
+			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 			bikeRide = collection.findOne(new ObjectId(id)).as(BikeRide.class);
 		}
 		catch (Exception e)
@@ -139,12 +160,10 @@ public class BikeRidesResource {
 		try 
 		{
 			//Get the objects using Jongo
-			Jongo jongo = new Jongo(MongoDatabase.Get_DB());
-			MongoCollection collection = jongo.getCollection(MONGO_COLLECTIONS.BIKERIDES.name());
+			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 			Iterable<BikeRide> all = collection.find().fields("{_id: 1, BikeRideName: 1, TargetAudience: 1, ImagePath: 1}").as(BikeRide.class);
-			ArrayList<BikeRide> bikeRideList = Lists.newArrayList(all);
 			root = new Root();
-			root.BikeRides = bikeRideList;
+			root.BikeRides = Lists.newArrayList(all);
 		}
 		catch (Exception e)
 		{
@@ -154,43 +173,32 @@ public class BikeRidesResource {
 		} 
 		return root;
 	}
-	
+
 	@POST
 	@Path("sortBydistance/{maxDistance}")
 	public Root getBikeRidesSortedByDistance(GeoLoc geoLoc, @PathParam("maxDistance") Double maxDistance) throws Exception {
 		if (maxDistance <= 0) { throw new Exception("Positive Max Distance only"); }
-		
-		return SortedByDistance("{GeoLoc: {$near: ["+geoLoc.Longitude+", "+geoLoc.Latitude+"], $maxDistance: "+maxDistance+"}}");
+		Root root = new Root();
+		//Get the objects using Jongo
+		MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES, true);
+		Iterable<BikeRide> all = collection
+				.find("{GeoLoc: {$near: ["+geoLoc.longitude.toPlainString()+", "+geoLoc.latitude.toPlainString()+"], $maxDistance: "+maxDistance+"}}")
+				.as(BikeRide.class);
+		root.BikeRides = Lists.newArrayList(all);
+		return root;
 	}
-	
+
 	@POST
 	@Path("sortBydistance")
 	public Root getBikeRidesSortedByDistance(GeoLoc geoLoc) throws Exception {
-		return SortedByDistance("{GeoLoc: {$near: ["+geoLoc.Longitude+", "+geoLoc.Latitude+"]}}");
-	}
-	
-	/**
-	 * http://docs.mongodb.org/manual/core/geospatial-indexes/
-	 * - http://jongo.org
-	 * @return
-	 * @throws Exception
-	 */
-	private Root SortedByDistance(String query) {
-		Root root = null;
-		try 
-		{
-			//Get the objects using Jongo
-			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES, "GeoLoc");
-			Iterable<BikeRide> all = collection.find(query).as(BikeRide.class);
-			ArrayList<BikeRide> bikeRideList = Lists.newArrayList(all);
-			root = new Root();
-			root.BikeRides = bikeRideList;
-		}
-		catch (Exception e)
-		{
-			LOG.log(Level.SEVERE, "Exception Error: " + e.getMessage());
-			e.printStackTrace();
-		} 
+		Root root = new Root();
+		//Get the objects using Jongo
+		MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES, true);
+		Iterable<BikeRide> all = collection
+				.find("{GeoLoc: {$near: ["+geoLoc.longitude.toPlainString()+", "+geoLoc.latitude.toPlainString()+"]}}")
+				.as(BikeRide.class);
+		root.BikeRides = Lists.newArrayList(all);
 		return root;
 	}
+
 }

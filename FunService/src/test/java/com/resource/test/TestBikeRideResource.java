@@ -1,5 +1,6 @@
 //package com.resource.test;
 //
+//import java.math.BigDecimal;
 //import java.util.Date;
 //import java.util.logging.Logger;
 //
@@ -10,6 +11,7 @@
 //import com.google.gson.Gson;
 //import com.model.BikeRide;
 //import com.model.GeoLoc;
+//import com.model.Location;
 //import com.model.Root;
 //import com.sun.jersey.api.client.Client;
 //import com.sun.jersey.api.client.ClientResponse;
@@ -19,7 +21,7 @@
 //import com.sun.jersey.api.client.filter.LoggingFilter;
 //
 ///**
-// * Web Service must be turned on: glassfish3/bin/asadmin start-domain
+// * Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
 // * Start the DB as well: mongod
 // * @author lancepoehler
 // *
@@ -54,10 +56,12 @@
 //		bikeRide.setBikeRideName("TestBikeRide"+ Math.random());
 //		Date now = new Date();
 //		bikeRide.setStartTime(now);
-//		GeoLoc geoLoc = new GeoLoc();
-//		geoLoc.Latitude = 45.4793;
-//		geoLoc.Longitude = -122.6890;
-//		bikeRide.setGeoLoc(geoLoc);
+//		bikeRide.setDetails("Great Details");
+//		Location location = new Location();
+//		location.setStreetAddress("1500 SE Ash St.");
+//		location.setCity("Portland");
+//		location.setState("OR");
+//		bikeRide.setLocation(location);
 //
 //		TestBikeRideResource.bikeRideName = bikeRide.getBikeRideName();
 //
@@ -114,12 +118,9 @@
 //		client.addFilter(new LoggingFilter());
 //		WebResource webResource = client.resource(REST_URI);
 //
-//		//Top entry
-//		//latitude: 45.4793;
-//		//Longitude = -122.6890;
 //		GeoLoc geoLoc = new GeoLoc();
-//		geoLoc.Latitude = 45.7793;
-//		geoLoc.Longitude = -122.4890;
+//		geoLoc.latitude = new BigDecimal(45.7793);
+//		geoLoc.longitude = new BigDecimal(-122.4890);
 //
 //		Root root = webResource
 //				.path("bikerides/sortBydistance")
@@ -137,12 +138,9 @@
 //		client.addFilter(new LoggingFilter());
 //		WebResource webResource = client.resource(REST_URI);
 //
-//		//Top entry
-//		//latitude: 45.4793;
-//		//Longitude = -122.6890;
 //		GeoLoc geoLoc = new GeoLoc();
-//		geoLoc.Latitude = 45.7793;
-//		geoLoc.Longitude = -122.4890;
+//		geoLoc.latitude = new BigDecimal(45.7793);
+//		geoLoc.longitude = new BigDecimal(-122.4890);
 //
 //		Root root = webResource
 //				.path("bikerides/sortBydistance/1")

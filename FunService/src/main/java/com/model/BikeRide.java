@@ -1,7 +1,6 @@
 package com.model;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -17,92 +16,90 @@ public class BikeRide {
 	private String Id;
 	private String BikeRideName;
 	private String Details;
+	private String RideLeaderId;
 	private String TargetAudience;
 	@XmlJavaTypeAdapter( DateAdapter.class)
 	private Date StartTime;
-	private String StartStreetAddress;
-	private String StartCity;
-	private GeoLoc GeoLoc;
-	private String ImagePath; //TODO Need to test putting the actual image in the DB vs external of DB.  http://stackoverflow.com/questions/4245787/how-to-insert-images-in-mongodb-using-java
-	private String RideLeader;
-	private int ParticipantCount;
-	private List<String> Participants;
+	private Location Location;
+	private String CityLocationId;
+	private String ImagePath = "Images/BikeRides/defaultBikeRide.jpg"; //In the event that no image is provided.
+
+	//Generated and send back.  not in DB
+	private Double DistanceFromClient;
+	@XmlJavaTypeAdapter( DateAdapter.class)
+	private Date MostRecentTracking;
+	private long TotalPeopleTrackingCount;
 
 	public String getId() {
 		return Id;
 	}
-	public void setId(String id) {
-		Id = id;
+	public void setId(String _id) {
+		this.Id = _id;
 	}
 	public String getBikeRideName() {
-		return BikeRideName;
+		return this.BikeRideName;
 	}
-	public void setBikeRideName(String bikeRideName) {
-		BikeRideName = bikeRideName;
+	public void setBikeRideName(String _bikeRideName) {
+		this.BikeRideName = _bikeRideName;
 	}
 	public String getDetails() {
-		return Details;
+		return this.Details;
 	}
-	public void setDetails(String details) {
-		Details = details;
+	public void setDetails(String _details) {
+		this.Details = _details;
 	}
 	public String getTargetAudience() {
-		return TargetAudience;
+		return this.TargetAudience;
 	}
-	public void setTargetAudience(String targetAudience) {
-		TargetAudience = targetAudience;
+	public void setTargetAudience(String _targetAudience) {
+		this.TargetAudience = _targetAudience;
 	}
 	public Date getStartTime() {
-		return StartTime;
+		return this.StartTime;
 	}
-	public void setStartTime(Date startTime) {
-		StartTime = startTime;
+	public void setStartTime(Date _startTime) {
+		this.StartTime = _startTime;
 	}
-	public String getStartStreetAddress() {
-		return StartStreetAddress;
+	public Location getLocation() {
+		return Location;
 	}
-	public void setStartStreetAddress(String startStreetAddress) {
-		StartStreetAddress = startStreetAddress;
+	public void setLocation(Location location) {
+		Location = location;
 	}
-	public String getStartCity() {
-		return StartCity;
+	public String getCityLocationId() {
+		return CityLocationId;
 	}
-	public void setStartCity(String startCity) {
-		StartCity = startCity;
-	}
-	public GeoLoc getGeoLoc() {
-		return GeoLoc;
-	}
-	public void setGeoLoc(GeoLoc geoLoc) {
-		GeoLoc = geoLoc;
+	public void setCityLocationId(String cityLocationId) {
+		CityLocationId = cityLocationId;
 	}
 	public String getImagePath() {
-		return ImagePath;
+		return this.ImagePath;
 	}
-	public void setImagePath(String imagePath) {
-		ImagePath = imagePath;
+	public void setImagePath(String _imagePath) {
+		this.ImagePath = _imagePath;
 	}
-	public String getRideLeader() {
-		return RideLeader;
+	public Double getDistanceFromClient() {
+		return DistanceFromClient;
 	}
-	public void setRideLeader(String rideLeader) {
-		RideLeader = rideLeader;
+	public void setDistanceFromClient(Double distanceFromClient) {
+		this.DistanceFromClient = distanceFromClient;
 	}
-	public int getParticipantCount() {
-		return ParticipantCount;
+	public String getRideLeaderId() {
+		return this.RideLeaderId;
 	}
-	public void setParticipantCount(int participantCount) {
-		ParticipantCount = participantCount;
+	public void setRideLeaderId(String rideLeaderId) {
+		RideLeaderId = rideLeaderId;
 	}
-	public List<String> getParticipants() {
-		return Participants;
+	public Date getMostRecentTracking() {
+		return MostRecentTracking;
 	}
-	public void setParticipants(List<String> participants) {
-		Participants = participants;
-		if (participants != null) {
-			ParticipantCount = participants.size(); 
-		} else {
-			ParticipantCount = 0;
-		}
+	public void setMostRecentTracking(Date mostRecentTracking) {
+		MostRecentTracking = mostRecentTracking;
+	}
+	public long getTotalPeopleTrackingCount() {
+		return TotalPeopleTrackingCount;
+	}
+	public void setTotalPeopleTrackingCount(long l) {
+		TotalPeopleTrackingCount = l;
 	}
 }
