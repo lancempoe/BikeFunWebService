@@ -1,25 +1,13 @@
 //package com.resource.test;
 //
-//import java.util.ArrayList;
-//import java.util.Date;
-//import java.util.List;
-//
 //import junit.framework.TestCase;
 //
-//import org.bson.types.ObjectId;
-//import org.joda.time.DateTime;
-//import org.joda.time.DateTimeZone;
-//import org.jongo.MongoCollection;
 //import org.junit.Test;
 //
-//import com.db.MongoDatabase;
-//import com.db.MongoDatabase.MONGO_COLLECTIONS;
-//import com.google.common.collect.Lists;
-//import com.model.BikeRide;
 //import com.model.Location;
 //import com.model.Root;
-//import com.model.Tracking;
 //import com.sun.jersey.api.client.Client;
+//import com.sun.jersey.api.client.ClientResponse;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -49,12 +37,15 @@
 //	@Test
 //	public void testDisplay_By_time_of_day() throws Exception {
 //
-//		PopulateDBWithTestData populate = new PopulateDBWithTestData();
-//		populate.testClearDataAddData();
-//
 //		Client client = Client.create(getDefaultClientConfig());
 //		client.addFilter(new LoggingFilter());
 //		WebResource webResource = client.resource(REST_URI);
+//
+////		//CLEAR THE DB WARNING.....
+////		webResource
+////		.path("/WARNING/CLEAR_AND_RESET_DB")
+////		.type("application/json")
+////		.post(ClientResponse.class);
 //
 //		Location location = new Location();
 //		location.setStreetAddress("1000 SE Main St.");
@@ -63,12 +54,11 @@
 //		GeoLocationHelper.setGeoLocation(location);
 //
 //		Root root = webResource
-//				.path("display/by_time_of_day/proximity/"+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
+//				.path("display/by_time_of_day/geoloc="+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
 //				.type("application/json")
 //				.get(Root.class);
 //
-//		assertTrue(root.BikeRides.size() == 3); //1 is in salem and one is more than 1 day old
-//		assertTrue(root.Locations.size() == 2);
+//		assertTrue(root.BikeRides.size() == 8); //1 is in salem and one is more than 1 day old
 //		assertTrue(root.ClosestLocation.getCity().equals("Portland"));
 //
 //		location = new Location();
@@ -78,12 +68,11 @@
 //		GeoLocationHelper.setGeoLocation(location);
 //
 //		root = webResource
-//				.path("display/by_time_of_day/proximity/"+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
+//				.path("display/by_time_of_day/geoloc="+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
 //				.type("application/json")
 //				.get(Root.class);
 //
-//		assertTrue(root.BikeRides.size() == 1);
-//		assertTrue(root.Locations.size() == 2);
+//		assertTrue(root.BikeRides.size() == 4);
 //		assertTrue(root.ClosestLocation.getCity().equals("Salem"));
 //
 //		location = new Location();
@@ -93,18 +82,17 @@
 //		GeoLocationHelper.setGeoLocation(location);
 //
 //		root = webResource
-//				.path("display/by_time_of_day/proximity/"+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
+//				.path("display/by_time_of_day/geoloc="+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
 //				.type("application/json")
 //				.get(Root.class);
 //
-//		assertTrue(root.BikeRides.size() == 3);
-//		assertTrue(root.Locations.size() == 2);
+//		assertTrue(root.BikeRides.size() == 8);
 //		assertTrue(root.ClosestLocation.getCity().equals("Portland"));
 //
 //		boolean validPath = true;
 //		try {
 //			root = webResource
-//					.path("display/by_time_of_day/proximity/765x43456,345.676543")
+//					.path("display/by_time_of_day/geoloc=765x43456,345.676543")
 //					.type("application/json")
 //					.get(Root.class);
 //		} catch (Exception e) {

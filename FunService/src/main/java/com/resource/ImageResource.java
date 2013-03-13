@@ -15,6 +15,11 @@ import javax.ws.rs.core.Response;
 
 import com.model.Image;
 
+/**
+ * 
+ * @author lancepoehler
+ *
+ */
 @Path("/images")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes (MediaType.APPLICATION_JSON)

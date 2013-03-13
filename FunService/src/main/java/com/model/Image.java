@@ -15,5 +15,5 @@ public class Image {
 
 	public String name;
 	public byte[] image;
-	
+
 }

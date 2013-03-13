@@ -1,32 +1,26 @@
 package com.tools;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * MongoDB uses UTC dates.
  * @author lancepoehler
+ * 
+ * I have disabled this for now.  This can and will work if needed.  Simply saving UTC times for now.
  *
  */
-public class DateAdapter extends XmlAdapter<String, Date> {
-
-	private static final String ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS zzz";
-	private static final TimeZone utc = TimeZone.getTimeZone("UTC");
-	private SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_FORMAT);
-
+public class DateAdapter extends XmlAdapter<Long, Date> {
 
 	@Override
-	public String marshal(Date v) throws Exception {
-		dateFormat.setTimeZone(utc);
-		return dateFormat.format(v);
+	public Long marshal(Date v) throws Exception {
+		return v.getTime();
 	}
 
 	@Override
-	public Date unmarshal(String v) throws Exception {
-		dateFormat.setTimeZone(utc);
-		return dateFormat.parse(v);
+	public Date unmarshal(Long v) throws Exception {
+		Date date = new Date(v);
+		return date;
 	}
 
 }

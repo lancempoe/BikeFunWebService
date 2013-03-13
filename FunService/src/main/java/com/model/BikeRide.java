@@ -1,14 +1,14 @@
 package com.model;
 
-import java.util.Date;
-
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.jongo.marshall.jackson.id.Id;
 
-import com.tools.DateAdapter;
-
+/**
+ * 
+ * @author lancepoehler
+ *
+ */
 @XmlRootElement
 public class BikeRide {
 
@@ -18,17 +18,17 @@ public class BikeRide {
 	private String Details;
 	private String RideLeaderId;
 	private String TargetAudience;
-	@XmlJavaTypeAdapter( DateAdapter.class)
-	private Date StartTime;
+	//@XmlJavaTypeAdapter( DateAdapter.class)
+	private Long RideStartTime;
 	private Location Location;
 	private String CityLocationId;
 	private String ImagePath = "Images/BikeRides/defaultBikeRide.jpg"; //In the event that no image is provided.
+	private boolean TrackingAllowed = true; //Default tracking is turned on.
 
 	//Generated and send back.  not in DB
 	private Double DistanceFromClient;
-	@XmlJavaTypeAdapter( DateAdapter.class)
-	private Date MostRecentTracking;
-	private long TotalPeopleTrackingCount;
+	private boolean CurrentlyTracking = false; //Default value
+	private long TotalPeopleTrackingCount = 0; //Default value
 
 	public String getId() {
 		return Id;
@@ -54,11 +54,11 @@ public class BikeRide {
 	public void setTargetAudience(String _targetAudience) {
 		this.TargetAudience = _targetAudience;
 	}
-	public Date getStartTime() {
-		return this.StartTime;
+	public Long getRideStartTime() {
+		return this.RideStartTime;
 	}
-	public void setStartTime(Date _startTime) {
-		this.StartTime = _startTime;
+	public void setRideStartTime(Long _rideStartTime) {
+		this.RideStartTime = _rideStartTime;
 	}
 	public Location getLocation() {
 		return Location;
@@ -78,6 +78,12 @@ public class BikeRide {
 	public void setImagePath(String _imagePath) {
 		this.ImagePath = _imagePath;
 	}
+	public boolean isTrackingAllowed() {
+		return TrackingAllowed;
+	}
+	public void setTrackingAllowed(boolean trackingAllowed) {
+		TrackingAllowed = trackingAllowed;
+	}
 	public Double getDistanceFromClient() {
 		return DistanceFromClient;
 	}
@@ -90,11 +96,11 @@ public class BikeRide {
 	public void setRideLeaderId(String rideLeaderId) {
 		RideLeaderId = rideLeaderId;
 	}
-	public Date getMostRecentTracking() {
-		return MostRecentTracking;
+	public boolean isCurrentlyTracking() {
+		return CurrentlyTracking;
 	}
-	public void setMostRecentTracking(Date mostRecentTracking) {
-		MostRecentTracking = mostRecentTracking;
+	public void setCurrentlyTracking(boolean currentlyTracking) {
+		CurrentlyTracking = currentlyTracking;
 	}
 	public long getTotalPeopleTrackingCount() {
 		return TotalPeopleTrackingCount;

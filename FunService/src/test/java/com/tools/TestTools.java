@@ -12,7 +12,7 @@ public class TestTools {
 	public void testDateAdapter() throws Exception {
 		Date now = new Date();
 		DateAdapter da = new DateAdapter();
-		String dateAsString = da.marshal(now);
+		Long dateAsString = now.getTime();
 		Date newNow = da.unmarshal(dateAsString);	
 
 		assertTrue(now.equals(newNow));

@@ -6,6 +6,11 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+/**
+ * 
+ * @author lancepoehler
+ *
+ */
 public class Listener implements ServletContextListener {
 
 	private static final Logger LOG = Logger.getLogger(Listener.class.getCanonicalName());

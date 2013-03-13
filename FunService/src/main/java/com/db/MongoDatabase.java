@@ -2,12 +2,18 @@ package com.db;
 
 import java.net.UnknownHostException;
 
+import org.apache.commons.lang.StringUtils;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 
+/**
+ * 
+ * @author lancepoehler
+ *
+ */
 public abstract class MongoDatabase {
 
 	public static MongoClient mongoClient;
@@ -27,7 +33,7 @@ public abstract class MongoDatabase {
 	 */
 	public static MongoCollection Get_DB_Collection(MONGO_COLLECTIONS collection)
 			throws Exception {
-		return Get_DB_Collection(collection, false);
+		return Get_DB_Collection(collection, "");
 	}
 
 	/**
@@ -37,13 +43,13 @@ public abstract class MongoDatabase {
 	 * @return
 	 * @throws Exception
 	 */
-	public static MongoCollection Get_DB_Collection(MONGO_COLLECTIONS collection, boolean geoLoc)
+	public static MongoCollection Get_DB_Collection(MONGO_COLLECTIONS collection, String geoLoc)
 			throws Exception {
 		MongoCollection coll;
 		try {
 			Jongo jongo = new Jongo(mongoClient.getDB(DB_NAME));
 			coll = jongo.getCollection(collection.name());
-			if (geoLoc) { coll.ensureIndex("{GeoLoc: '2d'}"); }
+			if (StringUtils.isNotBlank(geoLoc)) { coll.ensureIndex("{"+geoLoc+": '2d'}"); }
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;

@@ -180,10 +180,13 @@ public class BikeRidesResource {
 		if (maxDistance <= 0) { throw new Exception("Positive Max Distance only"); }
 		Root root = new Root();
 		//Get the objects using Jongo
-		MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES, true);
+		MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES, "Location.GeoLoc");
 		Iterable<BikeRide> all = collection
-				.find("{GeoLoc: {$near: ["+geoLoc.longitude.toPlainString()+", "+geoLoc.latitude.toPlainString()+"], $maxDistance: "+maxDistance+"}}")
-				.as(BikeRide.class);
+				.find("{Location.GeoLoc: {$near: [#, #], $maxDistance: #}}",
+						geoLoc.longitude,
+						geoLoc.latitude,
+						maxDistance)
+						.as(BikeRide.class);
 		root.BikeRides = Lists.newArrayList(all);
 		return root;
 	}
@@ -193,10 +196,12 @@ public class BikeRidesResource {
 	public Root getBikeRidesSortedByDistance(GeoLoc geoLoc) throws Exception {
 		Root root = new Root();
 		//Get the objects using Jongo
-		MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES, true);
+		MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES, "Location.GeoLoc");
 		Iterable<BikeRide> all = collection
-				.find("{GeoLoc: {$near: ["+geoLoc.longitude.toPlainString()+", "+geoLoc.latitude.toPlainString()+"]}}")
-				.as(BikeRide.class);
+				.find("{Location.GeoLoc: {$near: [#, #]}}",
+						geoLoc.longitude,
+						geoLoc.latitude)
+						.as(BikeRide.class);
 		root.BikeRides = Lists.newArrayList(all);
 		return root;
 	}

@@ -1,5 +1,6 @@
 package com.resource;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +20,6 @@ import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.Location;
-import com.model.Root;
 import com.tools.GeoLocationHelper;
 
 /**
@@ -82,21 +82,20 @@ public class LocationResource {
 	}
 
 	@GET
-	public Root getLocations() throws Exception {
-		Root root = null;
+	public List<Location> getLocations() throws Exception {
+		List<Location> locations = null;
 		try 
 		{
 			//Get the objects using Jongo
 			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 			Iterable<Location> all = usersCollection.find().as(Location.class);		
-			root = new Root();
-			root.Locations = Lists.newArrayList(all);
+			locations = Lists.newArrayList(all);
 		}
 		catch (Exception e)
 		{
 			LOG.log(Level.SEVERE, "Exception Error: " + e.getMessage());
 			e.printStackTrace();
 		} 
-		return root;
+		return locations;
 	}
 }

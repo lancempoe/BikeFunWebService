@@ -1,15 +1,18 @@
 package com.model;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.jongo.marshall.jackson.id.Id;
 
-import com.tools.DateAdapter;
-
+/**
+ * 
+ * @author lancepoehler
+ *
+ */
 @XmlRootElement
 public class User {
 
@@ -20,8 +23,7 @@ public class User {
 	private String Email;
 	private boolean AccountActivated;
 	private String ImagePath = "Images/Users/defaultUser.jpg"; //In the event that no image is provided.
-	@XmlJavaTypeAdapter( DateAdapter.class)
-	private Date JoinedTimeStamp; //Defaulting with a Date of now.
+	private Long JoinedTimeStamp; //Defaulting with a Date of now.
 	private int HostedBikeRideCount;
 	private int JoinedBikeRideCount;
 	private List<Integer> HostedBikeRides;
@@ -65,15 +67,25 @@ public class User {
 	public void setImagePath(String imagePath) {
 		ImagePath = imagePath;
 	}
-	public Date getJoinedTimeStamp() {
+	public Long getJoinedTimeStamp() {
 		if (JoinedTimeStamp == null) //Default to now
 		{
-			JoinedTimeStamp = new Date();
+			JoinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
 		}
 		return JoinedTimeStamp;
 	}
-	public void setJoinedTimeStamp(Date joinedTimeStamp) {
+	public void setJoinedTimeStamp(Long joinedTimeStamp) {
 		JoinedTimeStamp = joinedTimeStamp;
+	}
+	public DateTime getJoinedTimeStampAsDateTime() {
+		if (JoinedTimeStamp == null) //Default to now
+		{
+			JoinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+		}
+		return new DateTime(JoinedTimeStamp);
+	}
+	public void setJoinedTimeStampAsDateTime(DateTime joinedTimeStamp) {
+		JoinedTimeStamp = joinedTimeStamp.getMillis();
 	}
 	public int getHostedBikeRideCount() {
 		return HostedBikeRideCount;

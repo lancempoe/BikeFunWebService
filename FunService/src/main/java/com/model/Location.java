@@ -4,6 +4,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.jongo.marshall.jackson.id.Id;
 
+/**
+ * 
+ * @author lancepoehler
+ *
+ */
 @XmlRootElement
 public class Location {
 
