@@ -186,7 +186,7 @@ public class BikeRidesResource {
 						geoLoc.longitude,
 						geoLoc.latitude,
 						maxDistance)
-						.as(BikeRide.class);
+				.as(BikeRide.class);
 		root.BikeRides = Lists.newArrayList(all);
 		return root;
 	}

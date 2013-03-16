@@ -1,7 +1,6 @@
 package com.resource;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,7 +10,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
@@ -23,6 +21,7 @@ import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
 import com.model.Root;
+import com.tools.CommonBikeRideCalls;
 import com.tools.GeoLocationHelper;
 import com.tools.TrackingHelper;
 
@@ -73,32 +72,11 @@ public class DisplayByTimeResource {
 		Root root = new Root();
 		try 
 		{
-			//**(Identify the closest city to the client with an upcoming ride: 2 DB Calls)**
-			//Query all BikeRide.LocationId for rides starting yesterday through the future.  
-			//We start with yesterday so that Rides that start at 11PM and end at 1AM can still be seen that night.
-			//Currently there is no end time.  That can change when we need. (To add ending time: dateTime.plusDays(1))
 			DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
 			Long yesterday = todayDateTime.minusDays(1).getMillis();  //
 			MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-			Iterable<String> all = bikeCollection
-					.distinct("CityLocationId")
-					.query("{RideStartTime: {$gt: #}}", 
-							yesterday)
-							.as(String.class);
-			ArrayList<ObjectId> locationIds = new ArrayList<ObjectId>();
-			for(String locationId : all) {
-				locationIds.add(new ObjectId(locationId));
-			}
 
-			Location closestLocation;
-			MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "GeoLoc");
-			//coll.ensureIndex("{GeoLoc: '2d'}") is set when getting the collection
-			closestLocation = locationCollection
-					.findOne("{GeoLoc: {$near: [#, #]}, _id: {$in:#}}", 
-							geoLoc.longitude,
-							geoLoc.latitude,
-							locationIds)
-							.as(Location.class);
+			Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
 			root.ClosestLocation = closestLocation;
 
 			//**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
@@ -107,9 +85,10 @@ public class DisplayByTimeResource {
 					.find("{RideStartTime: {$gt: #}, CityLocationId: #}", 
 							yesterday, 
 							root.ClosestLocation.getId())
-							.sort("{RideStartTime : 1}")
-							.limit(200)
-							.as(BikeRide.class);
+					.sort("{RideStartTime : 1}")
+					.limit(200)
+					.fields("{CityLocationId: 0, RideLeaderId: 0, Details: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 
 			//**(Set tracking on bike rides: 2 DB call)
