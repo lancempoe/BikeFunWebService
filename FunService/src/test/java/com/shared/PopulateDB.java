@@ -56,7 +56,7 @@ public class PopulateDB {
 			BikeRide bikeRide = new BikeRide();
 			bikeRide.bikeRideName = "1: One Day in the Future Ride: Apple ride";
 
-			Long future = now.plusDays(1).getMillis();  //
+			Long future = now.plusDays(10).getMillis();  //
 			bikeRide.rideStartTime = future;
 			bikeRide.details = "You need to come and eat these pears?";
 			bikeRide.rideLeaderId = users.get(0).id;
@@ -73,7 +73,7 @@ public class PopulateDB {
 
 			bikeRide = new BikeRide();
 			bikeRide.bikeRideName = "2: Two Days in the future";
-			future = now.plusDays(2).getMillis();  //
+			future = now.plusDays(20).getMillis();  //
 			bikeRide.rideStartTime = future;
 			bikeRide.details = "Great 80's music all night long.  You will not want to miss this ride.";
 			bikeRide.rideLeaderId = users.get(0).id;
@@ -90,7 +90,7 @@ public class PopulateDB {
 
 			bikeRide = new BikeRide();
 			bikeRide.bikeRideName = "3: Two Days in the future, Salem Ride";
-			future = now.plusDays(2).getMillis();
+			future = now.plusDays(20).getMillis();
 			bikeRide.rideStartTime = future;
 			bikeRide.details = "Let's ride our bike in salem with apples.  Ya!";
 			bikeRide.rideLeaderId = users.get(1).id;

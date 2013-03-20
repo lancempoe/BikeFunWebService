@@ -61,10 +61,10 @@
 //		WebResource webResource = client.resource(REST_URI);
 //
 //		//CLEAR THE DB WARNING.....
-//		webResource
-//		.path("/WARNING/CLEAR_AND_RESET_DB")
-//		.type("application/json")
-//		.post(ClientResponse.class);
+////		webResource
+////		.path("/WARNING/CLEAR_AND_RESET_DB")
+////		.type("application/json")
+////		.post(ClientResponse.class);
 //
 //		PopulateDB populate = new PopulateDB();
 //		populate.populateDB(webResource);

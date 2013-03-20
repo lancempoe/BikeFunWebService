@@ -18,8 +18,8 @@
 //	private static final Logger LOG = Logger.getLogger(TestDBHeavyLoad.class.getCanonicalName());
 //
 //	protected static final String WEB_APP_NAME = "FunService";
-//	protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
-//	//protected static final String BASE_URI = "http://24.21.204.4/" + WEB_APP_NAME; //Test
+//	//protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
+//	protected static final String BASE_URI = "http://24.21.204.4/" + WEB_APP_NAME; //Test
 //	protected static final String REST_URI = BASE_URI + "/" + "rest";
 //
 //	protected ClientConfig getDefaultClientConfig() {
