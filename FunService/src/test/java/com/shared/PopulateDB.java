@@ -12,6 +12,7 @@ import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.AnonymousUser;
 import com.model.BikeRide;
+import com.model.DeviceAccounts;
 import com.model.Location;
 import com.model.Tracking;
 import com.sun.jersey.api.client.WebResource;
@@ -30,11 +31,12 @@ public class PopulateDB {
 			//Add users
 			for(int i = 0; i < 4; i++) {
 				AnonymousUser au = new AnonymousUser();
-				au.deviceUUID = UUID.randomUUID().toString();
-				au.key = "1234";
+				au.deviceAccounts = new DeviceAccounts();
+				au.deviceAccounts.deviceUUID = UUID.randomUUID().toString();;
+				au.deviceAccounts.key = "1234";
 
 				webResource
-				.path("users/anonymous/"+au.key+"/"+au.deviceUUID)
+				.path("users/anonymous/"+au.deviceAccounts.key+"/"+au.deviceAccounts.deviceUUID)
 				.type("application/json")
 				.get(AnonymousUser.class);				
 			}

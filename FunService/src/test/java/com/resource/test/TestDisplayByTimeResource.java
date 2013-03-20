@@ -7,7 +7,6 @@
 //import com.model.Location;
 //import com.model.Root;
 //import com.sun.jersey.api.client.Client;
-//import com.sun.jersey.api.client.ClientResponse;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -41,53 +40,53 @@
 //		client.addFilter(new LoggingFilter());
 //		WebResource webResource = client.resource(REST_URI);
 //
-////		//CLEAR THE DB WARNING.....
-////		webResource
-////		.path("/WARNING/CLEAR_AND_RESET_DB")
-////		.type("application/json")
-////		.post(ClientResponse.class);
+//		//		//CLEAR THE DB WARNING.....
+//		//		webResource
+//		//		.path("/WARNING/CLEAR_AND_RESET_DB")
+//		//		.type("application/json")
+//		//		.post(ClientResponse.class);
 //
 //		Location location = new Location();
-//		location.setStreetAddress("1000 SE Main St.");
-//		location.setCity("Portland");
-//		location.setState("OR");
+//		location.streetAddress = ("1000 SE Main St.");
+//		location.city = ("Portland");
+//		location.state = ("OR");
 //		GeoLocationHelper.setGeoLocation(location);
 //
 //		Root root = webResource
-//				.path("display/by_time_of_day/geoloc="+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
+//				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
 //				.type("application/json")
 //				.get(Root.class);
 //
 //		assertTrue(root.BikeRides.size() == 8); //1 is in salem and one is more than 1 day old
-//		assertTrue(root.ClosestLocation.getCity().equals("Portland"));
+//		assertTrue(root.ClosestLocation.city.equals("Portland"));
 //
 //		location = new Location();
-//		location.setStreetAddress("1224 2nd Street Northwest");
-//		location.setCity("SALEM");
-//		location.setState("OR");
+//		location.streetAddress = ("1224 2nd Street Northwest");
+//		location.city = ("SALEM");
+//		location.state = ("OR");
 //		GeoLocationHelper.setGeoLocation(location);
 //
 //		root = webResource
-//				.path("display/by_time_of_day/geoloc="+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
+//				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
 //				.type("application/json")
 //				.get(Root.class);
 //
 //		assertTrue(root.BikeRides.size() == 4);
-//		assertTrue(root.ClosestLocation.getCity().equals("Salem"));
+//		assertTrue(root.ClosestLocation.city.equals("Salem"));
 //
 //		location = new Location();
-//		location.setStreetAddress("SE Ash & SE 22nd");
-//		location.setCity("Portland");
-//		location.setState("OR");
+//		location.streetAddress = ("SE Ash & SE 22nd");
+//		location.city = ("Portland");
+//		location.state = ("OR");
 //		GeoLocationHelper.setGeoLocation(location);
 //
 //		root = webResource
-//				.path("display/by_time_of_day/geoloc="+ location.getGeoLoc().latitude + "," + location.getGeoLoc().longitude)
+//				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
 //				.type("application/json")
 //				.get(Root.class);
 //
 //		assertTrue(root.BikeRides.size() == 8);
-//		assertTrue(root.ClosestLocation.getCity().equals("Portland"));
+//		assertTrue(root.ClosestLocation.city.equals("Portland"));
 //
 //		boolean validPath = true;
 //		try {

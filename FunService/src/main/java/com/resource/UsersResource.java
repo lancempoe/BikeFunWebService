@@ -15,6 +15,7 @@ import org.jongo.MongoCollection;
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.AnonymousUser;
+import com.model.DeviceAccounts;
 
 /**
  * See: http://jongo.org
@@ -50,14 +51,15 @@ public class UsersResource {
 			//check if already an anonymousUser
 			MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
 			if (auCollection != null && auCollection.count() > 0) {
-				au = auCollection.findOne("{deviceUUID:#}",deviceUUID).as(AnonymousUser.class);
+				au = auCollection.findOne("{deviceAccounts.deviceUUID:#}",deviceUUID).as(AnonymousUser.class);
 			}
 
 			//Create new if it doesn't exist.
-			if (au == null || (!au.key.equals(key))) {
+			if (au == null || (!au.deviceAccounts.key.equals(key))) {
 				au = new AnonymousUser();
-				au.deviceUUID = deviceUUID;
-				au.key = key;
+				au.deviceAccounts = new DeviceAccounts();
+				au.deviceAccounts.deviceUUID = deviceUUID;
+				au.deviceAccounts.key = key;
 
 				//Get the object using Jongo
 				MongoCollection anonymousUsersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
