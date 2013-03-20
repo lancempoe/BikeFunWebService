@@ -38,10 +38,10 @@ public class CommonBikeRideCalls {
 		}
 
 		Location closestLocation;
-		MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "GeoLoc");
-		//coll.ensureIndex("{GeoLoc: '2d'}") is set when getting the collection
+		MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "geoLoc");
+		//coll.ensureIndex("{geoLoc: '2d'}") is set when getting the collection
 		closestLocation = locationCollection
-				.findOne("{GeoLoc: {$near: [#, #]}, _id: {$in:#}}", 
+				.findOne("{geoLoc: {$near: [#, #]}, _id: {$in:#}}", 
 						geoLoc.longitude,
 						geoLoc.latitude,
 						locationIds)

@@ -288,7 +288,7 @@ public class PopulateDB {
 			ArrayList<BikeRide> bikeRides = Lists.newArrayList(allBikes);
 			MongoDatabase.mongoClient.close();
 
-			//Add a few trackers TODO NOT WORKING :(
+			//Add a few trackers
 			Tracking tracking = new Tracking();
 			Long tracktime = now.getMillis();
 			tracking.bikeRideId = (bikeRides.get(5).id);

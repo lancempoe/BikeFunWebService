@@ -1,11 +1,22 @@
 //package com.resource.test;
 //
+//import java.util.List;
+//import java.util.logging.Level;
 //import java.util.logging.Logger;
 //
 //import junit.framework.TestCase;
 //
+//import org.apache.commons.lang.StringUtils;
+//import org.joda.time.DateTime;
+//import org.joda.time.DateTimeZone;
+//import org.jongo.MongoCollection;
 //import org.junit.Test;
 //
+//import com.db.MongoDatabase;
+//import com.db.MongoDatabase.MONGO_COLLECTIONS;
+//import com.google.common.collect.Lists;
+//import com.model.BikeRide;
+//import com.model.GeoLoc;
 //import com.model.Location;
 //import com.model.Query;
 //import com.model.Root;
@@ -16,14 +27,16 @@
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
+//import com.tools.CommonBikeRideCalls;
 //import com.tools.GeoLocationHelper;
+//import com.tools.TrackingHelper;
 //
 ///**
-// * Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
-// * Start the DB as well: mongod
-// * @author lancepoehler
-// *
-// */
+//* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
+//* Start the DB as well: mongod
+//* @author lancepoehler
+//*
+//*/
 //public class TestDisplayBySearchResource extends TestCase { //extends JerseyTest {
 //
 //	private static final Logger LOG = Logger.getLogger(TestDisplayBySearchResource.class.getCanonicalName());
@@ -37,7 +50,7 @@
 //		ClientConfig cc = new DefaultClientConfig();
 //		cc.getProperties().put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, true);
 //		//TO use POJO Json clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-//		return cc;	
+//		return cc;
 //	}
 //
 //	@Test
@@ -83,7 +96,7 @@
 //
 //		assertTrue(root.BikeRides.size() == 2); //1 in name, 2 in details (1 of which is in salem).
 //		assertTrue(root.ClosestLocation.city.equals("Portland"));
-//		
+//
 //		query = new Query();
 //		query.targetAudience = "21+";
 //

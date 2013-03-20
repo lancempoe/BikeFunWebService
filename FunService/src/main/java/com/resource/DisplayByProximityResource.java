@@ -76,7 +76,7 @@ public class DisplayByProximityResource {
 		{
 			//**(Identify the closest city to the client: 1 DB Call)**
 			MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "geoLoc");
-			//coll.ensureIndex("{GeoLoc: '2d'}") is set when getting the collection
+			//coll.ensureIndex("{geoLoc: '2d'}") is set when getting the collection
 			Location closestLocation = locationCollection
 					.findOne("{geoLoc: {$near: [#, #]}}", 
 							geoLoc.longitude, 

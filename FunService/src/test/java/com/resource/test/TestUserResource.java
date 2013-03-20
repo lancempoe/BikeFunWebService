@@ -28,7 +28,7 @@
 //		ClientConfig cc = new DefaultClientConfig();
 //		cc.getProperties().put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, true);
 //		//TO use POJO Json clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-//		return cc;	
+//		return cc;
 //	}
 //
 //	@Test
