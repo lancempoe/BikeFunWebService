@@ -17,7 +17,8 @@ public class AnonymousUser {
 	@Id
 	public String id;
 	public DeviceAccounts deviceAccounts = new DeviceAccounts();
-	public String userName = "Anonymous"; //User should never change.
+    public String imagePath = "Images/Users/defaultUser.jpg"; //Default user image.
+    public String userName = "Anonymous"; //User should never change.
 	public Long joinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
 	
 }
