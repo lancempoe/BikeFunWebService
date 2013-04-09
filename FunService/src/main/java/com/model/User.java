@@ -26,7 +26,6 @@ public class User {
 	public String imagePath = "Images/Users/defaultUser.jpg"; //In the event that no image is provided.
 	public Long joinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
 	public boolean readTipsForRideLeaders;
-	public boolean readTermsOfAgreement;
 
 	//Generated and send back.  not in DB
 	public List<String> hostedBikeRides;

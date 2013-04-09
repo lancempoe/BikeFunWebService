@@ -107,7 +107,7 @@ public class BikeRidesResource {
 
 	@POST
 	@Path("new")
-	public Response newBikeRide(BikeRide bikeRide) {
+	public BikeRide newBikeRide(BikeRide bikeRide) {
 		Response response;
 		try {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. New BikeRide request");
@@ -121,6 +121,8 @@ public class BikeRidesResource {
 				collection.save(bikeRide);
 
 				response = Response.status(Response.Status.OK).build();
+                //Send back the bikeRide so the ID can be obtained
+
 			} else { 
 				//Invalid address
 				response = Response.status(Response.Status.CONFLICT).build();
@@ -130,8 +132,9 @@ public class BikeRidesResource {
 			LOG.log(Level.SEVERE, e.getMessage());
 			e.printStackTrace();
 			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+            //TODO NEED TO SEND BACK SOMETHING ELSE.
 		}
-		return response;
+		return bikeRide;
 	}
 
 	/*

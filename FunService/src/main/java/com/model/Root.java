@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Root {
 
 	//Used for display
-	public List<User> Users = new ArrayList<User>();
 	public List<BikeRide> BikeRides = new ArrayList<BikeRide>();
 	public Location ClosestLocation = new Location();
 
