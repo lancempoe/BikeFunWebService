@@ -24,7 +24,7 @@ public class BikeRide {
 	public Long rideStartTime;
 	public Location location;
 	public String cityLocationId;
-	public String imagePath = "Images/BikeRides/defaultBikeRide.jpg"; //In the event that no image is provided.
+	public String imagePath;
 	public boolean trackingAllowed = true; //Default tracking is turned on.
 
 	//Generated and send back.  not in DB

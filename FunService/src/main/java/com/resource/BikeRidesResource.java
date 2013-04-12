@@ -1,6 +1,7 @@
 package com.resource;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.jongo.MongoCollection;
 
@@ -114,7 +116,15 @@ public class BikeRidesResource {
 
 			//Validate real address:
 			if (GeoLocationHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
-					GeoLocationHelper.setBikeRideLocationId(bikeRide)) { 
+					GeoLocationHelper.setBikeRideLocationId(bikeRide)) {
+
+                if (StringUtils.isEmpty(bikeRide.imagePath)) {
+                    bikeRide.imagePath = ImageResource.BikeRideImageLocation + "defaultBikeRide.jpg";
+                } else {
+                    int i = bikeRide.imagePath.lastIndexOf('.');
+                    String fileName = UUID.randomUUID() + bikeRide.imagePath.substring(i);
+                    bikeRide.imagePath = ImageResource.BikeRideImageLocation + fileName;
+                }
 
 				//save the object using Jongo
 				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);

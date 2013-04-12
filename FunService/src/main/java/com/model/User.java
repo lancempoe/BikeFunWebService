@@ -23,7 +23,7 @@ public class User {
 	public String email;
 	public List<DeviceAccounts> deviceAccounts = new ArrayList<DeviceAccounts>();
 	public boolean accountActivated;
-	public String imagePath = "Images/Users/defaultUser.jpg"; //In the event that no image is provided.
+	public String imagePath;
 	public Long joinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
 	public boolean readTipsForRideLeaders;
 

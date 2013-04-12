@@ -25,16 +25,16 @@ import java.util.logging.Logger;
 public class ImageResource {
 
 	private static final Logger LOG = Logger.getLogger(ImageResource.class.getCanonicalName());
-    private static final String BikeRideImageLocation = "/webapps/FunService/Images/BikeRides/";
-    private static final String UserImageLocation = "/webapps/FunService/Images/Users/";
+    private static final String url = "www.BikeFunFinder.com";
+    public static final String BikeRideImageLocation = url + "/FunService/Images/BikeRides/";
+    public static final String UserImageLocation = url + "/FunService/Images/Users/";
 
 	@POST
 	@Path("bikerides/upload")
 	public Response newBikeRideImage(@FormDataParam("file") InputStream uploadedInputStream,
                              @FormDataParam("file") FormDataContentDisposition fileDetail) {
 
-        String uploadDirectory = System.getProperty("catalina.base") + BikeRideImageLocation;
-        String uploadedFileLocation = uploadDirectory + fileDetail.getFileName();
+        String uploadedFileLocation = BikeRideImageLocation + fileDetail.getFileName();
 
         return saveImage(uploadedInputStream, uploadedFileLocation);
 	}
@@ -44,8 +44,7 @@ public class ImageResource {
     public Response newUserImage(@FormDataParam("file") InputStream uploadedInputStream,
                                      @FormDataParam("file") FormDataContentDisposition fileDetail) {
 
-        String uploadDirectory = System.getProperty("catalina.base") + UserImageLocation;
-        String uploadedFileLocation = uploadDirectory + fileDetail.getFileName();
+        String uploadedFileLocation = UserImageLocation + fileDetail.getFileName();
 
         return saveImage(uploadedInputStream, uploadedFileLocation);
     }
