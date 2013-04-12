@@ -1,5 +1,7 @@
 //package com.resource.test;
 //
+//import java.awt.image.BufferedImage;
+//import java.io.File;
 //import java.util.ArrayList;
 //import java.util.List;
 //import java.util.UUID;
@@ -24,6 +26,8 @@
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
 //import com.tools.GeoLocationHelper;
+//
+//import javax.imageio.ImageIO;
 //
 ///**
 //* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
@@ -104,6 +108,12 @@
 //			location.state = ("OR");
 //			bikeRide.location = location;
 //            bikeRide.imagePath = "test.jpg";
+//
+//
+//            //Save the resized image
+//            int i = bikeRide.imagePath.lastIndexOf('.');
+//            String extention = bikeRide.imagePath.substring(i+1);
+//
 //
 //            bikeRide = webResource
 //					.path("bikerides/new")

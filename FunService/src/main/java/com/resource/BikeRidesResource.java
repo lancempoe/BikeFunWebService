@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.tools.ImageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.jongo.MongoCollection;
@@ -118,13 +119,7 @@ public class BikeRidesResource {
 			if (GeoLocationHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
 					GeoLocationHelper.setBikeRideLocationId(bikeRide)) {
 
-                if (StringUtils.isEmpty(bikeRide.imagePath)) {
-                    bikeRide.imagePath = ImageResource.BikeRideImageLocation + "defaultBikeRide.jpg";
-                } else {
-                    int i = bikeRide.imagePath.lastIndexOf('.');
-                    String fileName = UUID.randomUUID() + bikeRide.imagePath.substring(i);
-                    bikeRide.imagePath = ImageResource.BikeRideImageLocation + fileName;
-                }
+                bikeRide.imagePath = getImagePath(bikeRide.imagePath);
 
 				//save the object using Jongo
 				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
@@ -169,7 +164,7 @@ public class BikeRidesResource {
 					SecurityTools.isValidUser(userId, key, deviceUUID) &&
 					SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
 
-				//Do now allow user to update rideLeaderId or cityLocationId; for now.
+				//Do not allow user to update rideLeaderId or cityLocationId; for now.
 				updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
 				Location updatedLocation = updatedBikeRide.location;
 				Location currentLocation = currentBikeRide.location;
@@ -188,6 +183,15 @@ public class BikeRidesResource {
 						return Response.status(Response.Status.BAD_REQUEST).build();
 					}
 				}
+
+                if (!currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
+                  //Delete Old
+                  ImageHelper imageHelper = new ImageHelper();
+                  imageHelper.deleteImage(updatedBikeRide.imagePath);
+
+                  //Update to new image path
+                  updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
+                }
 
 				//update the object
 				collection.save(updatedBikeRide);
@@ -221,7 +225,12 @@ public class BikeRidesResource {
 					SecurityTools.isValidUser(userId, key, deviceUUID) &&
 					SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
 
+                //Remove ride
 				collection.remove(new ObjectId(updatedBikeRide.id));
+
+                //Remove ride image
+                ImageHelper imageHelper = new ImageHelper();
+                imageHelper.deleteImage(updatedBikeRide.imagePath);
 
 				response = Response.status(Response.Status.OK).build();
 				LOG.log(Level.FINEST, "Delete BikeRide: " + updatedBikeRide.id);
@@ -237,4 +246,16 @@ public class BikeRidesResource {
 		}
 		return response;
 	}
+
+    private String getImagePath(String startingImagePath) {
+        String newImagePath = "";
+        if (StringUtils.isEmpty(startingImagePath)) {
+            newImagePath = ImageResource.BikeRideImageUrl + ImageHelper.defaultBikeRideImage;
+        } else {
+            int i = startingImagePath.lastIndexOf('.');
+            String fileName = UUID.randomUUID() + startingImagePath.substring(i);
+            newImagePath = ImageResource.BikeRideImageUrl + fileName;
+        }
+        return newImagePath;
+    }
 }
