@@ -42,7 +42,7 @@ public class GeoLocationHelper {
 		try {
 			final Geocoder geocoder = new Geocoder();
 			GeocoderRequest geocoderRequest;
-			GeocodeResponse geocoderResponse;
+			GeocodeResponse geocoderResponse=null;
 
 			//This will fail if it is not synchronized.  The classes are not threadsafe
 			synchronized(GeoLocationHelper.class) {
@@ -53,7 +53,7 @@ public class GeoLocationHelper {
                                                         location.state)
                             .setLanguage("en").getGeocoderRequest();
 
-                    geocoderResponse = geocoder.geocode(geocoderRequest);
+                    //geocoderResponse = geocoder.geocode(geocoderRequest);
                 } catch(java.lang.IllegalArgumentException oops) {
                     System.out.println("Oops!");
                     oops.printStackTrace(System.out);
