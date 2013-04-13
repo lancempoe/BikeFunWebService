@@ -1,26 +1,8 @@
 package com.resource;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import com.google.code.geocoder.Geocoder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.jongo.MongoCollection;
-
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
+import com.google.code.geocoder.Geocoder;
 import com.google.common.collect.Lists;
 import com.model.BikeRide;
 import com.model.GeoLoc;
@@ -29,6 +11,19 @@ import com.model.Root;
 import com.tools.CommonBikeRideCalls;
 import com.tools.GeoLocationHelper;
 import com.tools.TrackingHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.jongo.MongoCollection;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 /**
  * 
@@ -104,12 +99,14 @@ public class DisplayByTimeResource {
 			root.ClosestLocation = closestLocation;
             root.BikeRides = new ArrayList<BikeRide>();
 
-            //http://appworks.timneuwerth.com/FunService/rest/display/by_time_of_day/geoloc=45.563784276666666528,-122.68653135833334034
             if(closestLocation==null) {
                 LOG.error("ClosestLocation is null!! yesterday="+yesterday);
                 root.ClosestLocation = new Location();
+                root.ClosestLocation.geoLoc = new GeoLoc();
                 Iterable<BikeRide> bikeRides = getRidesFromDB(yesterday, bikeCollection);
+
                 root.BikeRides.addAll(Lists.newArrayList(bikeRides));
+                LOG.error("root.BikeRides.="+root.BikeRides.size());
             } else {
                 //**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
                 //Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
@@ -144,7 +141,6 @@ public class DisplayByTimeResource {
     }
 
     private Iterable<BikeRide> getRidesFromDB(Long yesterday, MongoCollection bikeCollection) {
-
         return bikeCollection
                 .find("{rideStartTime: {$gt: #}}",
                         yesterday)

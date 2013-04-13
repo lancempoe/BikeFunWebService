@@ -1,14 +1,13 @@
 package com.tools;
 
-import java.util.ArrayList;
-
-import org.bson.types.ObjectId;
-import org.jongo.MongoCollection;
-
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.GeoLoc;
 import com.model.Location;
+import org.bson.types.ObjectId;
+import org.jongo.MongoCollection;
+
+import java.util.ArrayList;
 
 /**
  * Shared classes for bike ride calls.

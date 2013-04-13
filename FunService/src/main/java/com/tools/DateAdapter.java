@@ -1,7 +1,7 @@
 package com.tools;
-import java.util.Date;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.Date;
 
 /**
  * MongoDB uses UTC dates.

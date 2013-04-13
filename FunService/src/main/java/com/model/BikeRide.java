@@ -1,11 +1,10 @@
 package com.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.jongo.marshall.jackson.id.Id;
 
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.jongo.marshall.jackson.id.Id;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 

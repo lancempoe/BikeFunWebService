@@ -1,14 +1,12 @@
 package com.tools;
 
-import java.io.ByteArrayOutputStream;
-
-import org.bson.LazyBSONCallback;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.DBObject;
 import com.mongodb.LazyWriteableDBObject;
-
 import de.undercouch.bson4jackson.BsonFactory;
+import org.bson.LazyBSONCallback;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * The following is an example of how to use this method.  Jongo's back end is similar but much more readable.

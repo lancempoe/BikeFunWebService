@@ -1,26 +1,19 @@
 package com.resource;
 
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.bson.types.ObjectId;
-import org.jongo.MongoCollection;
-
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.Location;
 import com.tools.GeoLocationHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.bson.types.ObjectId;
+import org.jongo.MongoCollection;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * See: Jongo: http://jongo.org
@@ -35,15 +28,15 @@ import com.tools.GeoLocationHelper;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes (MediaType.APPLICATION_JSON)
 public class LocationResource {
+    private static final Log LOG = LogFactory.getLog(LocationResource.class);
 
-	private static final Logger LOG = Logger.getLogger(LocationResource.class.getCanonicalName());
 
 	@POST
 	@Path("new")
 	public Response newLocation(Location location) {
 		Response response;
 		try {
-			LOG.log(Level.FINEST, "Received POST XML/JSON Request. New Location request");
+			LOG.info("Received POST XML/JSON Request. New Location request");
 
 			if (GeoLocationHelper.setGeoLocation(location))
 			{
@@ -55,7 +48,7 @@ public class LocationResource {
 				response = Response.status(Response.Status.PRECONDITION_FAILED).build();
 			}
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE,  e.getMessage());
+			LOG.error(e);
 			e.printStackTrace();
 			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
 		}
@@ -66,15 +59,13 @@ public class LocationResource {
 	@Path("{id}")
 	public Location getLocation(@PathParam("id") String id) throws Exception {
 		Location location = null;
-		try 
-		{			
+		try {
 			//Get the object using Jongo
 			MongoCollection coll = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 			location = coll.findOne(new ObjectId(id)).as(Location.class);
 		}
-		catch (Exception e)
-		{
-			LOG.log(Level.INFO, "Exception Error when getting user: " + e.getMessage());
+		catch (Exception e) {
+			LOG.error("Exception Error when getting user: ", e);
 			e.printStackTrace();
 			throw e;
 		} 
@@ -93,7 +84,7 @@ public class LocationResource {
 		}
 		catch (Exception e)
 		{
-			LOG.log(Level.SEVERE, "Exception Error: " + e.getMessage());
+			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
 		} 
 		return locations;

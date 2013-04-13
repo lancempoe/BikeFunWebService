@@ -1,10 +1,10 @@
 package com.model;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.marshall.jackson.id.Id;
+
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * 

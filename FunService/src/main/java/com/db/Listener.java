@@ -1,10 +1,9 @@
 package com.db;
 
-import java.net.UnknownHostException;
-import java.util.logging.Logger;
-
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 /**
  * 

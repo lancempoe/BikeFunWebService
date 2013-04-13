@@ -1,19 +1,5 @@
 package com.resource;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.logging.Logger;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.jongo.MongoCollection;
-
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
@@ -23,6 +9,19 @@ import com.model.Location;
 import com.model.Root;
 import com.tools.GeoLocationHelper;
 import com.tools.TrackingHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.jongo.MongoCollection;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 
@@ -33,9 +32,9 @@ import com.tools.TrackingHelper;
 @Produces(MediaType.APPLICATION_JSON)
 public class DisplayByProximityResource {
 
-	private static final Logger LOG = Logger.getLogger(DisplayByProximityResource.class.getCanonicalName());
+    private static final Log LOG = LogFactory.getLog(DisplayByProximityResource.class);
 
-	private static final Double ONE_DEGREE_IN_MILES = 69.11; //1¡ of latitude = about 69.11 miles.
+	private static final Double ONE_DEGREE_IN_MILES = 69.11; //1ï¿½ of latitude = about 69.11 miles.
 	private static final int RADIUS_IN_MILES = 3;
 	private static final int TIME_IN_MINUTES = 60;
 
@@ -121,7 +120,7 @@ public class DisplayByProximityResource {
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			LOG.severe("DisplayByProximity Failed");
+			LOG.error("DisplayByProximity Failed", e);
 		}
 
 		//**(Return Root)**

@@ -1,36 +1,25 @@
 package com.resource;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.db.MongoDatabase;
+import com.db.MongoDatabase.MONGO_COLLECTIONS;
+import com.model.*;
+import com.tools.GeoLocationHelper;
 import com.tools.ImageHelper;
+import com.tools.SecurityTools;
+import com.tools.TrackingHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
 
-import com.db.MongoDatabase;
-import com.db.MongoDatabase.MONGO_COLLECTIONS;
-import com.model.AnonymousUser;
-import com.model.BikeRide;
-import com.model.GeoLoc;
-import com.model.Location;
-import com.model.User;
-import com.tools.GeoLocationHelper;
-import com.tools.SecurityTools;
-import com.tools.TrackingHelper;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Mongo with Jongo.
@@ -47,8 +36,7 @@ import com.tools.TrackingHelper;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes (MediaType.APPLICATION_JSON)
 public class BikeRidesResource {
-
-	private static final Logger LOG = Logger.getLogger(BikeRidesResource.class.getCanonicalName());
+    private static final Log LOG = LogFactory.getLog(BikeRidesResource.class);
 
 	@GET
 	@Path("{id}/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
@@ -91,7 +79,7 @@ public class BikeRidesResource {
 		}
 		catch (Exception e)
 		{
-			LOG.log(Level.INFO, "Exception Error when getting user: " + e.getMessage());
+			LOG.info("Exception Error when getting user: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return bikeRide;
@@ -102,7 +90,7 @@ public class BikeRidesResource {
     public BikeRide newBikeRide(BikeRide bikeRide) {
         Response response;
         try {
-            LOG.log(Level.FINEST, "Received POST XML/JSON Request. New BikeRide request");
+            LOG.info("Received POST XML/JSON Request. New BikeRide request");
 
             //Validate real address:
             if (GeoLocationHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
@@ -126,7 +114,7 @@ public class BikeRidesResource {
             }
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, e.getMessage());
+            LOG.error(e.getMessage());
             e.printStackTrace();
             response = Response.status(Response.Status.PRECONDITION_FAILED).build();
             //TODO NEED TO SEND BACK SOMETHING ELSE.
@@ -148,7 +136,7 @@ public class BikeRidesResource {
 	public Response updateBikeRide(BikeRide updatedBikeRide, @PathParam("userId") String userId, @PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID)  {
 		Response response;
 		try {
-			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Update BikeRide request");
+			LOG.info("Received POST XML/JSON Request. Update BikeRide request");
 
 			//Get the object and validate that the client has access to the ride.
 			MongoCollection collectionBikeRide = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
@@ -200,7 +188,7 @@ public class BikeRidesResource {
 				response = Response.status(Response.Status.FORBIDDEN).build();
 			}
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE,  e.getMessage());
+			LOG.error(e);
 			e.printStackTrace();
 			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
 		}
@@ -212,7 +200,7 @@ public class BikeRidesResource {
 	public Response deleteBikeRide(BikeRide updatedBikeRide, @PathParam("userId") String userId, @PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID) throws Exception {
 		Response response;
 		try {
-			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Delete BikeRide request");
+			LOG.info("Received POST XML/JSON Request. Delete BikeRide request");
 
 			//Get the object and validate that the client has access to the ride.
 			MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
@@ -234,14 +222,14 @@ public class BikeRidesResource {
                 updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
 
                 response = Response.status(Response.Status.OK).build();
-				LOG.log(Level.FINEST, "Delete BikeRide: " + currentBikeRide.id);
+				LOG.info("Delete BikeRide: " + currentBikeRide.id);
 
 			} else {
 				//Client is not allowed to delete the selected role.
 				response = Response.status(Response.Status.FORBIDDEN).build();
 			}
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE,  e.getMessage());
+			LOG.error(e);
 			e.printStackTrace();
 			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
 		}

@@ -1,32 +1,22 @@
 package com.resource;
 
-import java.math.BigDecimal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
+import com.db.MongoDatabase;
+import com.db.MongoDatabase.MONGO_COLLECTIONS;
+import com.google.common.collect.Lists;
+import com.model.*;
+import com.tools.CommonBikeRideCalls;
+import com.tools.GeoLocationHelper;
+import com.tools.TrackingHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
 
-import com.db.MongoDatabase;
-import com.db.MongoDatabase.MONGO_COLLECTIONS;
-import com.google.common.collect.Lists;
-import com.model.BikeRide;
-import com.model.GeoLoc;
-import com.model.Location;
-import com.model.Query;
-import com.model.Root;
-import com.tools.CommonBikeRideCalls;
-import com.tools.GeoLocationHelper;
-import com.tools.TrackingHelper;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
 
 /**
  * This class is used for querying the db for a particular ride or type of ride.
@@ -38,8 +28,8 @@ import com.tools.TrackingHelper;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes (MediaType.APPLICATION_JSON)
 public class DisplayBySearchResource {
+    private static final Log LOG = LogFactory.getLog(DisplayBySearchResource.class);
 
-	private static final Logger LOG = Logger.getLogger(DisplayBySearchResource.class.getCanonicalName());
 
 	@POST
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
@@ -118,7 +108,7 @@ public class DisplayBySearchResource {
 		}
 		catch (Exception e)
 		{
-			LOG.log(Level.SEVERE, "Exception Error: " + e.getMessage());
+			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
 			return null;
 		}

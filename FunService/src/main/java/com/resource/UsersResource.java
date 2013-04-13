@@ -1,21 +1,22 @@
 package com.resource;
 
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-
-import com.model.*;
+import com.db.MongoDatabase;
+import com.db.MongoDatabase.MONGO_COLLECTIONS;
+import com.model.AnonymousUser;
+import com.model.DeviceAccounts;
+import com.model.ForeignIdType;
+import com.model.User;
 import com.tools.ImageHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
 
-import com.db.MongoDatabase;
-import com.db.MongoDatabase.MONGO_COLLECTIONS;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.UUID;
 
 /**
  * See: http://jongo.org
@@ -32,7 +33,7 @@ import com.db.MongoDatabase.MONGO_COLLECTIONS;
 @Consumes (MediaType.APPLICATION_JSON)
 public class UsersResource {
 
-	private static final Logger LOG = Logger.getLogger(UsersResource.class.getCanonicalName());
+    private static final Log LOG = LogFactory.getLog(UsersResource.class);
 
 	/**
 	 * Client sends over the device UUID and a 4 digit random number
@@ -46,7 +47,7 @@ public class UsersResource {
 	public AnonymousUser getAnonymousUser(@PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID) throws Exception {
 		AnonymousUser au = null;
 		try {
-			LOG.log(Level.FINE, "Received POST XML/JSON Request. AnonymousUser request");
+			LOG.info("Received POST XML/JSON Request. AnonymousUser request");
 
 			//check if already an anonymousUser
 			MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
@@ -61,7 +62,7 @@ public class UsersResource {
 				au.deviceAccounts.key = key;
                 au.imagePath = getImagePath(au.imagePath);
 
-				LOG.log(Level.FINE, "AnonymousUser created");
+				LOG.info("AnonymousUser created");
 			}
 
             //Note the use.  Helps us identify active users.
@@ -70,7 +71,7 @@ public class UsersResource {
             //Get the object using Jongo
             auCollection.save(au);
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE,  e.getMessage());
+			LOG.error(e);
 			e.printStackTrace();
 			throw e;
 		}
@@ -82,7 +83,7 @@ public class UsersResource {
     public User getUser(User submittedUser) {
         User myUser = null;
         try {
-            LOG.log(Level.FINEST, "Received POST XML/JSON Request. User request");
+            LOG.info("Received POST XML/JSON Request. User request");
 
             //Check that the foreign key and token are valid. Return null if not logged in.
             if (!isLoggedIn(submittedUser)) { return null; }
@@ -107,7 +108,7 @@ public class UsersResource {
                 //Get the object using Jongo
                 userCollection.save(myUser);
 
-                LOG.log(Level.FINE, "User created");
+                LOG.info("User created");
             } else {
                 //validate that the uuid is part of this account.
                 boolean deviceFound = false;
@@ -128,7 +129,7 @@ public class UsersResource {
                 userCollection.save(myUser);
             }
         } catch (Exception e) {
-            LOG.log(Level.SEVERE,  e.getMessage());
+            LOG.error(e);
             e.printStackTrace();
         }
         return myUser;
@@ -139,7 +140,7 @@ public class UsersResource {
     public User updateUser(User submittedUser) {
         User myUser = null;
         try {
-            LOG.log(Level.FINEST, "Received POST XML/JSON update Request. User request");
+            LOG.info("Received POST XML/JSON update Request. User request");
 
             //Check that the foreign key and token are valid. Return null if not logged in.
             if (!isLoggedIn(submittedUser)) { return null; }
@@ -186,7 +187,7 @@ public class UsersResource {
             userCollection.save(myUser);
 
         } catch (Exception e) {
-            LOG.log(Level.SEVERE,  e.getMessage());
+            LOG.error(e);
             e.printStackTrace();
         }
         return myUser;
@@ -210,7 +211,7 @@ public class UsersResource {
                 }
             }
         } catch (Exception e) {
-            LOG.log(Level.SEVERE,  e.getMessage());
+            LOG.error(e);
             e.printStackTrace();
         }
         return loggedIn;

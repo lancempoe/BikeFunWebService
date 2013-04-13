@@ -1,21 +1,16 @@
 package com.shared;
 
-import java.util.ArrayList;
-import java.util.UUID;
-
+import com.db.MongoDatabase;
+import com.db.MongoDatabase.MONGO_COLLECTIONS;
+import com.google.common.collect.Lists;
+import com.model.*;
+import com.sun.jersey.api.client.WebResource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
 
-import com.db.MongoDatabase;
-import com.db.MongoDatabase.MONGO_COLLECTIONS;
-import com.google.common.collect.Lists;
-import com.model.AnonymousUser;
-import com.model.BikeRide;
-import com.model.DeviceAccounts;
-import com.model.Location;
-import com.model.Tracking;
-import com.sun.jersey.api.client.WebResource;
+import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * This class is used during testing to validate query's to the DB.

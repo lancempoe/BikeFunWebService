@@ -1,12 +1,5 @@
 package com.tools;
 
-import java.math.BigDecimal;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jongo.MongoCollection;
-
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.code.geocoder.Geocoder;
@@ -17,6 +10,12 @@ import com.google.code.geocoder.model.GeocoderStatus;
 import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jongo.MongoCollection;
+
+import java.math.BigDecimal;
 
 /**
  * 

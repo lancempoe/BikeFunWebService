@@ -1,11 +1,5 @@
 package com.tools;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.joda.time.DateTime;
-import org.jongo.MongoCollection;
-
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
@@ -13,6 +7,11 @@ import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Tracking;
 import com.settings.SharedValues;
+import org.joda.time.DateTime;
+import org.jongo.MongoCollection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 

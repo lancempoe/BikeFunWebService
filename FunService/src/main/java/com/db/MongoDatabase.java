@@ -1,13 +1,12 @@
 package com.db;
 
-import java.net.UnknownHostException;
-
+import com.mongodb.DB;
+import com.mongodb.MongoClient;
 import org.apache.commons.lang.StringUtils;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
+import java.net.UnknownHostException;
 
 /**
  * 

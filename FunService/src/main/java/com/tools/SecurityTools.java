@@ -1,13 +1,12 @@
 package com.tools;
 
-import org.bson.types.ObjectId;
-import org.jongo.MongoCollection;
-
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.AnonymousUser;
 import com.model.DeviceAccounts;
 import com.model.User;
+import org.bson.types.ObjectId;
+import org.jongo.MongoCollection;
 
 public class SecurityTools {
 

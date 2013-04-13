@@ -1,8 +1,7 @@
 package com.model;
 
-import java.math.BigDecimal;
-
 import javax.xml.bind.annotation.XmlRootElement;
+import java.math.BigDecimal;
 
 /**
  * 

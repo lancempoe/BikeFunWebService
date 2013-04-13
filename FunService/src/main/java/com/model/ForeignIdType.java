@@ -1,8 +1,5 @@
 package com.model;
 
-import java.lang.Exception;
-import java.lang.String;
-
 /**
  * Created with IntelliJ IDEA.
  * User: lancepoehler

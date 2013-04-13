@@ -1,13 +1,12 @@
 package com.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.marshall.jackson.id.Id;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
