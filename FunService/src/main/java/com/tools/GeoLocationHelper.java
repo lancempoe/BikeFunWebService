@@ -1,8 +1,6 @@
 package com.tools;
 
 import java.math.BigDecimal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -49,15 +47,19 @@ public class GeoLocationHelper {
 			//This will fail if it is not synchronized.  The classes are not threadsafe
 			synchronized(GeoLocationHelper.class) {
                 try {
-                    geocoderRequest = new GeocoderRequestBuilder().setAddress(
-                                                        (StringUtils.isNotBlank(location.streetAddress) ? location.streetAddress+", " : " ") +
-                                                        (StringUtils.isNotBlank(location.city) ? location.city+", " : " ") +
-                                                        location.state)
-                            .setLanguage("en").getGeocoderRequest();
+                    final String address = buildAddressString(location);
+                    if(address==null || StringUtils.isEmpty(address)) {
+                        return false;
+                    }
+
+                    geocoderRequest = new GeocoderRequestBuilder()
+                                            .setAddress(address)
+                                            .setLanguage("en")
+                                            .getGeocoderRequest();
 
                     geocoderResponse = geocoder.geocode(geocoderRequest);
-                } catch(IllegalArgumentException oops) {
-                    LOG.error("Illegal geocoder request", oops);
+                } catch(Throwable oops) {
+                    LOG.error("Error calling geocoder service", oops);
                     return false;
                 }
 			}
@@ -92,8 +94,14 @@ public class GeoLocationHelper {
 			return false;
 		}
 	}
-	
-	public static boolean setBikeRideLocationId(BikeRide bikeRide) {
+
+    private static String buildAddressString(Location location) {
+        return (StringUtils.isNotBlank(location.streetAddress) ? location.streetAddress + ", " : " ") +
+                                (StringUtils.isNotBlank(location.city) ? location.city + ", " : " ") +
+                                location.state;
+    }
+
+    public static boolean setBikeRideLocationId(BikeRide bikeRide) {
 		try {
 			//Check is current city exist
 			MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
