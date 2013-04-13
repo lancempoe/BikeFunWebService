@@ -102,12 +102,12 @@ public class DisplayByTimeResource {
 
 			Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
 			root.ClosestLocation = closestLocation;
+            root.BikeRides = new ArrayList<BikeRide>();
 
-            List<BikeRide> ridesList = new ArrayList<BikeRide>();
-            root.BikeRides = ridesList;
-
+            //http://appworks.timneuwerth.com/FunService/rest/display/by_time_of_day/geoloc=45.563784276666666528,-122.68653135833334034
             if(closestLocation==null) {
-                LOG.error("ClosestLocation is null!!");
+                LOG.error("ClosestLocation is null!! yesterday="+yesterday);
+                root.ClosestLocation = new Location();
                 Iterable<BikeRide> bikeRides = getRidesFromDB(yesterday, bikeCollection);
                 root.BikeRides.addAll(Lists.newArrayList(bikeRides));
             } else {
@@ -144,6 +144,7 @@ public class DisplayByTimeResource {
     }
 
     private Iterable<BikeRide> getRidesFromDB(Long yesterday, MongoCollection bikeCollection) {
+
         return bikeCollection
                 .find("{rideStartTime: {$gt: #}}",
                         yesterday)
