@@ -5,6 +5,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jongo.MongoCollection;
 
 import com.db.MongoDatabase;
@@ -25,7 +27,7 @@ import com.model.Location;
  */
 public class GeoLocationHelper {
 
-	private static final Logger LOG = Logger.getLogger(GeoLocationHelper.class.getCanonicalName());
+    private static final Log LOG = LogFactory.getLog(Geocoder.class);
 
 	/**
 	 * I am currently calling the Google Geolocation API.  
@@ -36,7 +38,7 @@ public class GeoLocationHelper {
 	 *
 	 */
 	public static boolean setGeoLocation(Location location) throws InterruptedException {
-		LOG.log(Level.FINEST, "Calling Google GeoLocation API");
+		LOG.debug("Calling Google GeoLocation API");
 
 
 		try {
@@ -55,16 +57,7 @@ public class GeoLocationHelper {
 
                     geocoderResponse = geocoder.geocode(geocoderRequest);
                 } catch(IllegalArgumentException oops) {
-                    System.out.println("Failed to get encoding");
-                    return false;
-                } catch(RuntimeException runtime) {
-                    System.out.println("runtime ex");
-                    return false;
-                } catch (Exception ex) {
-                    System.out.println("ex ex");
-                    return false;
-                } catch(Throwable highest) {
-                    System.out.println("throwable ex");
+                    LOG.error("Illegal geocoder request", oops);
                     return false;
                 }
 			}
