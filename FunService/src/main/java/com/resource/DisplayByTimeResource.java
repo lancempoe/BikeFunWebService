@@ -145,7 +145,7 @@ public class DisplayByTimeResource {
 
     private Iterable<BikeRide> getRidesFromDB(Long yesterday, MongoCollection bikeCollection) {
         return bikeCollection
-                .find("{rideStartTime: {$gt: #}",
+                .find("{rideStartTime: {$gt: #}}",
                         yesterday)
                 .sort("{rideStartTime : 1}")
                 .limit(200)
