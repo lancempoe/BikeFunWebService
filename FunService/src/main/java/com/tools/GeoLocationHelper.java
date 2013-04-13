@@ -54,10 +54,12 @@ public class GeoLocationHelper {
 				geocoderResponse = geocoder.geocode(geocoderRequest);
 			}
 
-			String fullAddress = geocoderResponse.getResults().get(0).getFormattedAddress();
 			if (geocoderResponse.getStatus() != GeocoderStatus.OK) {
-				return false;
-			} else if (geocoderResponse.getResults().get(0).isPartialMatch())
+                return false;
+            }
+
+            String fullAddress = geocoderResponse.getResults().get(0).getFormattedAddress();
+            if (geocoderResponse.getResults().get(0).isPartialMatch())
 			{ 
 				if (!fullAddress.toLowerCase().contains(location.city.toLowerCase()) ||
 						!fullAddress.toLowerCase().contains(", "+location.state.toLowerCase())) {
