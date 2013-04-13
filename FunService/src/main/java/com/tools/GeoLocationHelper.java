@@ -48,7 +48,7 @@ public class GeoLocationHelper {
 			synchronized(GeoLocationHelper.class) {
                 try {
                     final String address = buildAddressString(location);
-                    if(address==null || StringUtils.isEmpty(address)) {
+                    if(address==null || StringUtils.isBlank(address)) {
                         return false;
                     }
 
