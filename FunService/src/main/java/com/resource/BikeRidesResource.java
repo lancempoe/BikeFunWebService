@@ -111,6 +111,7 @@ public class BikeRidesResource {
 
             } else {
                 //Invalid address
+                LOG.info("Invalid address, we're not making the ride sucker!");
                 response = Response.status(Response.Status.CONFLICT).build();
             }
 
@@ -122,9 +123,6 @@ public class BikeRidesResource {
         }
         return bikeRide;
     }
-
-
-
 
     /*
 	 * Allows the owner to update their rides.  Only updates if there are changes to the bike ride.
