@@ -14,7 +14,6 @@ import java.util.List;
 public class Root {
 
 	//Used for display
-    @XmlElement(name="bikeRides", required=true, nillable=false, type=ArrayList.class)
 	public List<BikeRide> BikeRides = new ArrayList<BikeRide>();
 	public Location ClosestLocation = new Location();
 
