@@ -54,7 +54,7 @@ public class GeoLocationHelper {
                             .setLanguage("en").getGeocoderRequest();
 
                     geocoderResponse = geocoder.geocode(geocoderRequest);
-                } catch(Throwable oops) {
+                } catch(java.lang.IllegalArgumentException oops) {
                     oops.printStackTrace(System.out);
                     return false;
                 }
