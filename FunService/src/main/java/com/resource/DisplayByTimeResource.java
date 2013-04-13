@@ -1,6 +1,8 @@
 package com.resource;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,6 +12,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.google.code.geocoder.Geocoder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
@@ -34,7 +39,7 @@ import com.tools.TrackingHelper;
 @Produces(MediaType.APPLICATION_JSON)
 public class DisplayByTimeResource {
 
-	private static final Logger LOG = Logger.getLogger(DisplayByTimeResource.class.getCanonicalName());
+    private static final Log LOG = LogFactory.getLog(Geocoder.class);
 
 	/**
 	 * Returns all items owned by client.
@@ -98,17 +103,19 @@ public class DisplayByTimeResource {
 			Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
 			root.ClosestLocation = closestLocation;
 
-			//**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
-			//Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
-			Iterable<BikeRide> bikeRides = bikeCollection
-					.find("{rideStartTime: {$gt: #}, cityLocationId: #}", 
-							yesterday, 
-							root.ClosestLocation.id)
-					.sort("{rideStartTime : 1}")
-					.limit(200)
-					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
-					.as(BikeRide.class);
-			root.BikeRides = Lists.newArrayList(bikeRides);
+            List<BikeRide> ridesList = new ArrayList<BikeRide>();
+            root.BikeRides = ridesList;
+
+            if(closestLocation==null) {
+                LOG.error("ClosestLocation is null!!");
+                Iterable<BikeRide> bikeRides = getRidesFromDB(yesterday, bikeCollection);
+                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
+            } else {
+                //**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
+                //Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
+                Iterable<BikeRide> bikeRides = getRidesFromDB(root.ClosestLocation.id, yesterday, bikeCollection);
+                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
+            }
 
 			//**(Set tracking on bike rides: 2 DB call)
 			TrackingHelper.setTracking(root.BikeRides, geoLoc);
@@ -116,7 +123,7 @@ public class DisplayByTimeResource {
 		}
 		catch (Exception e)
 		{
-			LOG.log(Level.SEVERE, "Exception Error: " + e.getMessage());
+			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
 			return null;
 		}
@@ -124,8 +131,29 @@ public class DisplayByTimeResource {
 		//**(Return Root)**
 		return root;
 	}
-	
-	/**
+
+    private Iterable<BikeRide> getRidesFromDB(String closetsLocationId, Long yesterday, MongoCollection bikeCollection) {
+        return bikeCollection
+                            .find("{rideStartTime: {$gt: #}, cityLocationId: #}",
+                                    yesterday,
+                                    closetsLocationId)
+                            .sort("{rideStartTime : 1}")
+                            .limit(200)
+                            .fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+                            .as(BikeRide.class);
+    }
+
+    private Iterable<BikeRide> getRidesFromDB(Long yesterday, MongoCollection bikeCollection) {
+        return bikeCollection
+                .find("{rideStartTime: {$gt: #}",
+                        yesterday)
+                .sort("{rideStartTime : 1}")
+                .limit(200)
+                .fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+                .as(BikeRide.class);
+    }
+
+    /**
 	 * 
 	 * @param geoLoc
 	 * @param rideLeaderId
@@ -154,7 +182,7 @@ public class DisplayByTimeResource {
 		}
 		catch (Exception e)
 		{
-			LOG.log(Level.SEVERE, "Exception Error: " + e.getMessage());
+			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
 			return null;
 		}
