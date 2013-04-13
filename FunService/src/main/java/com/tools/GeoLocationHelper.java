@@ -49,6 +49,7 @@ public class GeoLocationHelper {
                 try {
                     final String address = buildAddressString(location);
                     if(address==null || StringUtils.isBlank(address)) {
+                        LOG.error("Geocoder called with blank address, aborting call");
                         return false;
                     }
 
