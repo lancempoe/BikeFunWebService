@@ -105,6 +105,7 @@ public class BikeRidesResource {
                 int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
                 updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
 
+                LOG.error("Not an error, but hey, we've got a new bikeride! id="+bikeRide.id);
                 response = Response.status(Response.Status.OK).build();
                 //Send back the bikeRide so the ID can be obtained
 
