@@ -54,7 +54,9 @@ public class GeoLocationHelper {
 				geocoderResponse = geocoder.geocode(geocoderRequest);
 			}
 
-			if (geocoderResponse.getStatus() != GeocoderStatus.OK) {
+			if (geocoderResponse==null ||
+                    geocoderResponse.getStatus()==null ||
+                    geocoderResponse.getStatus() != GeocoderStatus.OK) {
                 return false;
             }
 
