@@ -55,6 +55,7 @@ public class GeoLocationHelper {
 
                     geocoderResponse = geocoder.geocode(geocoderRequest);
                 } catch(java.lang.IllegalArgumentException oops) {
+                    System.out.println("Oops!");
                     oops.printStackTrace(System.out);
                     return false;
                 }
