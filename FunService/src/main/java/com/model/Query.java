@@ -14,5 +14,6 @@ public class Query {
 	public String cityLocationId; //If not provided then use current location
 	public Long date;
 	public String targetAudience;
+    public String rideLeaderId;
 
 }

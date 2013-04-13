@@ -1,21 +1,21 @@
 package com.resource;
 
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
+import com.model.*;
+import com.tools.ImageHelper;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
 
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
-import com.model.AnonymousUser;
-import com.model.DeviceAccounts;
 
 /**
  * See: http://jongo.org
@@ -57,15 +57,18 @@ public class UsersResource {
 			//Create new if it doesn't exist.
 			if (au == null || (!au.deviceAccounts.key.equals(key))) {
 				au = new AnonymousUser();
-				au.deviceAccounts = new DeviceAccounts();
 				au.deviceAccounts.deviceUUID = deviceUUID;
 				au.deviceAccounts.key = key;
+                au.imagePath = getImagePath(au.imagePath);
 
-				//Get the object using Jongo
-				MongoCollection anonymousUsersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
-				anonymousUsersCollection.save(au);
 				LOG.log(Level.FINE, "AnonymousUser created");
 			}
+
+            //Note the use.  Helps us identify active users.
+            au.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+
+            //Get the object using Jongo
+            auCollection.save(au);
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE,  e.getMessage());
 			e.printStackTrace();
@@ -74,105 +77,154 @@ public class UsersResource {
 		return au;
 	}
 
-	//	@GET
-	//	@Path("/users/{id}/{provider}/{key}/{externalId}/{deviceUUID}")
-	//	public User getUser(
-	//			@PathParam("id") String id, 
-	//			@PathParam("provider") String provider, 
-	//			@PathParam("key") String key, 
-	//			@PathParam("externalId") String externalId,
-	//			@PathParam("deviceUUID") String deviceUUID) {
-	//		User myUser = null;
-	//		try {
-	//			LOG.log(Level.FINEST, "Received POST XML/JSON Request. User request");
-	//
-	//			//TODO
-	//			//CHECK THE KEY WITH THE provider
-	//			//if invalid then return null
-	//			
-	//			//check if already an user
-	//			MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
-	//			myUser = auCollection.findOne(new ObjectId(id)).as(User.class);
-	//			
-	//			if (myUser != null) {
-	//				//Check if deviceUUID is new.
-	//				//add if needed
-	//			} else {
-	//				
-	//				myUser = new User();
-	//				myUser.deviceUUIDs = Arrays.asList( deviceUUID );
-	//				
-	//				//Get the object using Jongo
-	//				MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
-	//				usersCollection.save(myUser);
-	//				myUser = user;
-	//				LOG.log(Level.FINE, "User created");
-	//			}
-	//		} catch (Exception e) {
-	//			LOG.log(Level.SEVERE,  e.getMessage());
-	//			e.printStackTrace();
-	//		}
-	//		return myUser;
-	//	}
-	//
-	//	@POST
-	//	@Path("/users/update/{key}/{deviceUUID}")
-	//	public User updateUser(@PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID) {
-	//		Response response;
-	//		try {
-	//			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Update User request");
-	//			
-	//			//Get the object using Jongo
-	//			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
-	//			usersCollection.save(user);
-	//
-	//			response = Response.status(Response.Status.OK).build();
-	//		} catch (Exception e) {
-	//			LOG.log(Level.SEVERE,  e.getMessage());
-	//			e.printStackTrace();
-	//			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
-	//		}
-	//		return response;
-	//	}
-	//
-	//	@DELETE
-	//	@Path("{userId}/delete")
-	//	public Response deleteUser(@PathParam("userId") String userId) throws Exception {
-	//		Response response;
-	//		try {
-	//			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Delete User request: \"" + userId + "\"");
-	//
-	//			//Delete the user using Jongo
-	//			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
-	//			usersCollection.remove(new ObjectId(userId));
-	//
-	//			//TODO SEND OUT EMAIL TO LET THE USER KNOW
-	//
-	//			response = Response.status(Response.Status.OK).build();
-	//		} catch (Exception e) {
-	//			LOG.log(Level.SEVERE,  e.getMessage());
-	//			e.printStackTrace();
-	//			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
-	//		}
-	//		return response;
-	//	}
-	//
-	//	@GET
-	//	@Path("{userId}")
-	//	public User getUser(@PathParam("userId") String userId) throws Exception {
-	//		User user = null;
-	//		try 
-	//		{			
-	//			//Get the object using Jongo
-	//			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
-	//			user = usersCollection.findOne(new ObjectId(userId)).fields("{Password: 0}").as(User.class);
-	//		}
-	//		catch (Exception e)
-	//		{
-	//			LOG.log(Level.INFO, "Exception Error when getting user: " + e.getMessage());
-	//			e.printStackTrace();
-	//			throw e;
-	//		} 
-	//		return user;
-	//	}
+    @POST
+    @Path("users")
+    public User getUser(User submittedUser) {
+        User myUser = null;
+        try {
+            LOG.log(Level.FINEST, "Received POST XML/JSON Request. User request");
+
+            //Check that the foreign key and token are valid. Return null if not logged in.
+            if (!isLoggedIn(submittedUser)) { return null; }
+
+            //check if already an anonymousUser
+            MongoCollection userCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
+            if (userCollection != null && userCollection.count() > 0) {
+                myUser = userCollection.findOne("{foreignId:#, foreignIdType:#}",submittedUser.foreignId, submittedUser.foreignIdType).as(User.class);
+            }
+
+            //Create new if it doesn't exist.
+            if (myUser == null) {
+                myUser = new User();
+                myUser.deviceAccounts.add(new DeviceAccounts());
+                myUser.deviceAccounts.get(myUser.deviceAccounts.size()-1).deviceUUID = submittedUser.deviceAccount.deviceUUID;
+                myUser.deviceAccounts.get(myUser.deviceAccounts.size()-1).key = submittedUser.deviceAccount.key;
+                myUser.foreignId = submittedUser.foreignId;
+                myUser.foreignIdType = submittedUser.foreignIdType;
+                myUser.userName = submittedUser.foreignId;
+                myUser.imagePath = getImagePath(submittedUser.imagePath);
+
+                //Get the object using Jongo
+                userCollection.save(myUser);
+
+                LOG.log(Level.FINE, "User created");
+            } else {
+                //validate that the uuid is part of this account.
+                boolean deviceFound = false;
+                for(DeviceAccounts myDeviceAccounts : myUser.deviceAccounts) {
+                    if (myDeviceAccounts.deviceUUID == submittedUser.deviceAccount.deviceUUID) {
+                        deviceFound = true;
+                        break;
+                    }
+                }
+                if (!deviceFound) {
+                    myUser.deviceAccounts.add(new DeviceAccounts());
+                    myUser.deviceAccounts.get(myUser.deviceAccounts.size()-1).deviceUUID = submittedUser.deviceAccount.deviceUUID;
+                    myUser.deviceAccounts.get(myUser.deviceAccounts.size()-1).key = submittedUser.deviceAccount.key;
+                }
+                myUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+
+                //Update the object using Jongo
+                userCollection.save(myUser);
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE,  e.getMessage());
+            e.printStackTrace();
+        }
+        return myUser;
+    }
+
+    @POST
+    @Path("users/update")
+    public User updateUser(User submittedUser) {
+        User myUser = null;
+        try {
+            LOG.log(Level.FINEST, "Received POST XML/JSON update Request. User request");
+
+            //Check that the foreign key and token are valid. Return null if not logged in.
+            if (!isLoggedIn(submittedUser)) { return null; }
+
+            //Validate User exist.
+            MongoCollection userCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
+            if (userCollection != null && userCollection.count() > 0) {
+                myUser = userCollection.findOne("{foreignId:#, foreignIdType:#}",submittedUser.foreignId, submittedUser.foreignIdType).as(User.class);
+            }
+            if (myUser == null) { return null; }
+
+            //Update user as requested.
+            if (!submittedUser.email.equals(myUser.email))
+                myUser.email = submittedUser.email;
+            if (!submittedUser.userName.equals(myUser.userName)) {
+                //Validate that the new name is available
+                Iterable<User> users = userCollection
+                        .find()
+                        .fields("{userName: 1}")
+                        .as(User.class);
+
+                boolean validUser = true;
+                for(User user : users) {
+                    if (submittedUser.userName.equals(user.userName)) {
+                        validUser = false;
+                        break;  //Currently not notifying the user.
+                    }
+                }
+                if (validUser) {
+                    myUser.userName = submittedUser.userName;
+                }
+            }
+            if (!myUser.imagePath.equals(submittedUser.imagePath)) {
+                //Delete Old
+                ImageHelper imageHelper = new ImageHelper();
+                imageHelper.deleteImage(myUser.imagePath);
+
+                //Update to new image path
+                myUser.imagePath = getImagePath(submittedUser.imagePath);
+            }
+            myUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+
+            //Update the object using Jongo
+            userCollection.save(myUser);
+
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE,  e.getMessage());
+            e.printStackTrace();
+        }
+        return myUser;
+    }
+
+    private boolean isLoggedIn(User submittedUser) {
+        boolean loggedIn = false;
+        try {
+            if (submittedUser != null ||
+                    !StringUtils.isEmpty(submittedUser.foreignId)  &&
+                    !StringUtils.isEmpty(submittedUser.foreignIdType) &&
+                    !StringUtils.isEmpty(submittedUser.deviceAccount.deviceUUID)) {
+
+                switch (ForeignIdType.fromName(submittedUser.foreignIdType)) {
+                    case FaceBook:
+
+                        break;
+                    case Google:
+
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE,  e.getMessage());
+            e.printStackTrace();
+        }
+        return loggedIn;
+    }
+
+    private String getImagePath(String startingImagePath) {
+        String newImagePath = "";
+        if (StringUtils.isEmpty(startingImagePath)) {
+            newImagePath = ImageResource.UserImageUrl + ImageHelper.defaultUserImage;
+        } else {
+            int i = startingImagePath.lastIndexOf('.');
+            String fileName = UUID.randomUUID() + startingImagePath.substring(i);
+            newImagePath = ImageResource.UserImageUrl + fileName;
+        }
+        return newImagePath;
+    }
 }

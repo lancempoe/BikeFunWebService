@@ -20,6 +20,7 @@ public class BikeRide {
 	public String bikeRideName;
 	public String details;
 	public String rideLeaderId;
+    public String rideLeaderName;
 	public String targetAudience;
 	public Long rideStartTime;
 	public Location location;
@@ -28,7 +29,6 @@ public class BikeRide {
 	public boolean trackingAllowed = true; //Default tracking is turned on.
 
 	//Generated and send back.  not in DB
-	public String rideLeaderName;
 	public Double distanceFromClient;
 	public boolean currentlyTracking = false; //Default value
 	public long totalPeopleTrackingCount = 0; //Default value

@@ -17,18 +17,19 @@ import org.jongo.marshall.jackson.id.Id;
 @XmlRootElement
 public class User {
 
-	@Id
+    @Id
 	public String id;
+    public String foreignId;
+    public String foreignIdType;
 	public String userName;
 	public String email;
 	public List<DeviceAccounts> deviceAccounts = new ArrayList<DeviceAccounts>();
-	public boolean accountActivated;
+    public DeviceAccounts deviceAccount = new DeviceAccounts();
+	public boolean accountActivated = true;
 	public String imagePath;
 	public Long joinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
-	public boolean readTipsForRideLeaders;
-
-	//Generated and send back.  not in DB
-	public List<String> hostedBikeRides;
-	public int hostedBikeRideCount;
+	public boolean readTipsForRideLeaders = false;
+    public Long latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+	public int totalHostedBikeRideCount;
 
 }

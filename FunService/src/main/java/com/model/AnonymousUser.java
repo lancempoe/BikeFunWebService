@@ -17,8 +17,11 @@ public class AnonymousUser {
 	@Id
 	public String id;
 	public DeviceAccounts deviceAccounts = new DeviceAccounts();
-    public String imagePath = "Images/Users/defaultUser.jpg"; //Default user image.
+    public String imagePath;
     public String userName = "Anonymous"; //User should never change.
 	public Long joinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+    public boolean readTipsForRideLeaders = false;
+    public Long latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+    public int totalHostedBikeRideCount;
 	
 }

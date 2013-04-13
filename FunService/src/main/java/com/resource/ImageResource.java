@@ -7,6 +7,7 @@ import javax.imageio.stream.ImageInputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.imageio.ImageIO;
@@ -46,22 +47,20 @@ public class ImageResource {
 
 
 	@POST
-	@Path("bikerides/upload")
-	public Response newBikeRideImage(@FormDataParam("file") InputStream uploadedInputStream,
-                             @FormDataParam("file") FormDataContentDisposition fileDetail) {
-
-        String uploadedFileLocation = BikeRideImageLocation + fileDetail.getFileName();
-
+	@Path("bikerides/upload/{photoURL}")
+	public Response newBikeRideImage(@PathParam("photoURL") String photoURL,
+                                     @FormDataParam("file") InputStream uploadedInputStream,
+                                     @FormDataParam("file") FormDataContentDisposition fileDetail) {
+        String uploadedFileLocation = BikeRideImageLocation + photoURL;
         return saveImage(uploadedInputStream, uploadedFileLocation);
 	}
 
     @POST
-    @Path("users/upload")
-    public Response newUserImage(@FormDataParam("file") InputStream uploadedInputStream,
-                                     @FormDataParam("file") FormDataContentDisposition fileDetail) {
-
-        String uploadedFileLocation = UserImageLocation + fileDetail.getFileName();
-
+    @Path("users/upload/{photoURL}")
+    public Response newUserImage(@PathParam("photoURL") String photoURL,
+                                 @FormDataParam("file") InputStream uploadedInputStream,
+                                 @FormDataParam("file") FormDataContentDisposition fileDetail) {
+        String uploadedFileLocation = UserImageLocation + photoURL;
         return saveImage(uploadedInputStream, uploadedFileLocation);
     }
 

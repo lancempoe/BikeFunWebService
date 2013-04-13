@@ -47,8 +47,9 @@ public class DisplayBySearchResource {
 		if (!GeoLocationHelper.isValidGeoLoc(latitude, longitude)) { return null; }
 		if (query == null || 
 				(StringUtils.isBlank(query.query) && 
-						StringUtils.isBlank(query.targetAudience) && 
-						StringUtils.isBlank(query.cityLocationId))) { return null; }
+                 StringUtils.isBlank(query.targetAudience) &&
+                 StringUtils.isBlank(query.cityLocationId) &&
+                 StringUtils.isBlank(query.rideLeaderId))) { return null; }
 
 		GeoLoc geoLoc = new GeoLoc();
 		geoLoc.latitude = latitude;
@@ -96,13 +97,15 @@ public class DisplayBySearchResource {
 			}
 
 			//Build the remaining query
-			String queryAsString = "{" + queryOrString + "cityLocationId: #";
+			String queryAsString = "{";
+            if(StringUtils.isNotBlank(query.rideLeaderId)) { queryOrString += "rideLeaderId: '" + query.rideLeaderId+"'"; }
+            if(StringUtils.isNotBlank(query.cityLocationId)) { queryOrString += "cityLocationId: '" + query.cityLocationId+"'"; }
 			if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += ", targetAudience: '"+query.targetAudience+"'"; }
 			if(filterStartDateTime != null) { queryAsString += ", rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}"; }
 			queryAsString += "}";		 
 
 			Iterable<BikeRide> bikeRides = bikeCollection
-					.find(queryAsString, query.cityLocationId)
+					.find(queryAsString)
 					.sort("{rideStartTime : 1}")
 					.limit(200)
 					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.

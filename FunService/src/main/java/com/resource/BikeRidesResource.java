@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import com.tools.ImageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.jongo.MongoCollection;
 
 import com.db.MongoDatabase;
@@ -85,19 +87,6 @@ public class BikeRidesResource {
 
 				//Get all current tracks
 				bikeRide.currentTrackings = TrackingHelper.getAllCurrentTrackings(bikeRide);
-
-				//Set ride leader name.
-				String leader = "";
-				MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
-				AnonymousUser rideLeaderAsAnonymousUser = auCollection.findOne(new ObjectId(bikeRide.rideLeaderId)).as(AnonymousUser.class);
-				if (rideLeaderAsAnonymousUser != null) {
-					leader = rideLeaderAsAnonymousUser.userName;
-				} else {
-					MongoCollection userCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
-					User rideLeaderAsUser = userCollection.findOne(new ObjectId(bikeRide.rideLeaderId)).as(User.class);
-					leader = rideLeaderAsUser.userName;
-				}
-				bikeRide.rideLeaderName = leader;
 			}
 		}
 		catch (Exception e)
@@ -108,41 +97,47 @@ public class BikeRidesResource {
 		return bikeRide;
 	}
 
-	@POST
-	@Path("new")
-	public BikeRide newBikeRide(BikeRide bikeRide) {
-		Response response;
-		try {
-			LOG.log(Level.FINEST, "Received POST XML/JSON Request. New BikeRide request");
+    @POST
+    @Path("new")
+    public BikeRide newBikeRide(BikeRide bikeRide) {
+        Response response;
+        try {
+            LOG.log(Level.FINEST, "Received POST XML/JSON Request. New BikeRide request");
 
-			//Validate real address:
-			if (GeoLocationHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
-					GeoLocationHelper.setBikeRideLocationId(bikeRide)) {
+            //Validate real address:
+            if (GeoLocationHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
+                    GeoLocationHelper.setBikeRideLocationId(bikeRide)) {
 
                 bikeRide.imagePath = getImagePath(bikeRide.imagePath);
 
-				//save the object using Jongo
-				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-				collection.save(bikeRide);
+                //save the object using Jongo
+                MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
+                collectionBikeRides.save(bikeRide);
 
-				response = Response.status(Response.Status.OK).build();
+                int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
+                updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
+
+                response = Response.status(Response.Status.OK).build();
                 //Send back the bikeRide so the ID can be obtained
 
-			} else { 
-				//Invalid address
-				response = Response.status(Response.Status.CONFLICT).build();
-			}
+            } else {
+                //Invalid address
+                response = Response.status(Response.Status.CONFLICT).build();
+            }
 
-		} catch (Exception e) {
-			LOG.log(Level.SEVERE, e.getMessage());
-			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, e.getMessage());
+            e.printStackTrace();
+            response = Response.status(Response.Status.PRECONDITION_FAILED).build();
             //TODO NEED TO SEND BACK SOMETHING ELSE.
-		}
-		return bikeRide;
-	}
+        }
+        return bikeRide;
+    }
 
-	/*
+
+
+
+    /*
 	 * Allows the owner to update their rides.  Only updates if there are changes to the bike ride.
 	 * TODO: This security should be improved.  Maybe we could have a new key generated each and every time the app starts. 
 	 * @param bikeRide
@@ -156,13 +151,13 @@ public class BikeRidesResource {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Update BikeRide request");
 
 			//Get the object and validate that the client has access to the ride.
-			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-			BikeRide currentBikeRide = collection.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
+			MongoCollection collectionBikeRide = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
+			BikeRide currentBikeRide = collectionBikeRide.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
 
 			//Validate that the client has access
 			if (currentBikeRide != null &&
-					SecurityTools.isValidUser(userId, key, deviceUUID) &&
-					SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
+                SecurityTools.isValidUser(userId, key, deviceUUID) &&
+                SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
 
 				//Do not allow user to update rideLeaderId or cityLocationId; for now.
 				updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
@@ -187,14 +182,17 @@ public class BikeRidesResource {
                 if (!currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
                   //Delete Old
                   ImageHelper imageHelper = new ImageHelper();
-                  imageHelper.deleteImage(updatedBikeRide.imagePath);
+                  imageHelper.deleteImage(currentBikeRide.imagePath);
 
                   //Update to new image path
                   updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
                 }
 
 				//update the object
-				collection.save(updatedBikeRide);
+                collectionBikeRide.save(updatedBikeRide);
+
+                //Update the user with updated active timestamp
+                updateLatestActiveTimeStamp(updatedBikeRide.rideLeaderId);
 
 				response = Response.status(Response.Status.OK).build();
 			} else {
@@ -217,8 +215,8 @@ public class BikeRidesResource {
 			LOG.log(Level.FINEST, "Received POST XML/JSON Request. Delete BikeRide request");
 
 			//Get the object and validate that the client has access to the ride.
-			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-			BikeRide currentBikeRide = collection.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
+			MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
+			BikeRide currentBikeRide = collectionBikeRides.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
 
 			//Validate that the client has access
 			if (currentBikeRide != null &&
@@ -226,14 +224,17 @@ public class BikeRidesResource {
 					SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
 
                 //Remove ride
-				collection.remove(new ObjectId(updatedBikeRide.id));
+                collectionBikeRides.remove(new ObjectId(currentBikeRide.id));
 
                 //Remove ride image
                 ImageHelper imageHelper = new ImageHelper();
-                imageHelper.deleteImage(updatedBikeRide.imagePath);
+                imageHelper.deleteImage(currentBikeRide.imagePath);
 
-				response = Response.status(Response.Status.OK).build();
-				LOG.log(Level.FINEST, "Delete BikeRide: " + updatedBikeRide.id);
+                int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
+                updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
+
+                response = Response.status(Response.Status.OK).build();
+				LOG.log(Level.FINEST, "Delete BikeRide: " + currentBikeRide.id);
 
 			} else {
 				//Client is not allowed to delete the selected role.
@@ -246,6 +247,46 @@ public class BikeRidesResource {
 		}
 		return response;
 	}
+
+    private void updateTotalHostedBikeRideCount(String rideLeaderId, int totalHostedBikeRideCount) {
+        try {
+            //Update User that created the ride.
+            MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
+            AnonymousUser rideLeaderAsAnonymousUser = auCollection.findOne(new ObjectId(rideLeaderId)).as(AnonymousUser.class);
+            if (rideLeaderAsAnonymousUser != null) {
+                rideLeaderAsAnonymousUser.totalHostedBikeRideCount = totalHostedBikeRideCount;
+                rideLeaderAsAnonymousUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+                auCollection.save(rideLeaderAsAnonymousUser);
+            } else {
+                MongoCollection userCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
+                User rideLeaderAsUser = userCollection.findOne(new ObjectId(rideLeaderId)).as(User.class);
+                rideLeaderAsUser.totalHostedBikeRideCount = totalHostedBikeRideCount;
+                rideLeaderAsUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+                userCollection.save(rideLeaderAsUser);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateLatestActiveTimeStamp(String rideLeaderId) {
+        try {
+            //Update User that created the ride.
+            MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
+            AnonymousUser rideLeaderAsAnonymousUser = auCollection.findOne(new ObjectId(rideLeaderId)).as(AnonymousUser.class);
+            if (rideLeaderAsAnonymousUser != null) {
+                rideLeaderAsAnonymousUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+                auCollection.save(rideLeaderAsAnonymousUser);
+            } else {
+                MongoCollection userCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
+                User rideLeaderAsUser = userCollection.findOne(new ObjectId(rideLeaderId)).as(User.class);
+                rideLeaderAsUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+                userCollection.save(rideLeaderAsUser);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private String getImagePath(String startingImagePath) {
         String newImagePath = "";
