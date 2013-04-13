@@ -53,13 +53,20 @@ public class GeoLocationHelper {
                                                         location.state)
                             .setLanguage("en").getGeocoderRequest();
 
-                    //geocoderResponse = geocoder.geocode(geocoderRequest);
-                } catch(java.lang.IllegalArgumentException oops) {
-                    System.out.println("Oops!");
-                    oops.printStackTrace(System.out);
+                    geocoderResponse = geocoder.geocode(geocoderRequest);
+                } catch(IllegalArgumentException oops) {
+                    System.out.println("Failed to get encoding");
+                    return false;
+                } catch(RuntimeException runtime) {
+                    System.out.println("runtime ex");
+                    return false;
+                } catch (Exception ex) {
+                    System.out.println("ex ex");
+                    return false;
+                } catch(Throwable highest) {
+                    System.out.println("throwable ex");
                     return false;
                 }
-
 			}
 
 			if (geocoderResponse==null ||
