@@ -46,17 +46,19 @@ public class GeoLocationHelper {
 
 			//This will fail if it is not synchronized.  The classes are not threadsafe
 			synchronized(GeoLocationHelper.class) {
-				geocoderRequest = new GeocoderRequestBuilder().setAddress(
-													(StringUtils.isNotBlank(location.streetAddress) ? location.streetAddress+", " : " ") +
-													(StringUtils.isNotBlank(location.city) ? location.city+", " : " ") +
-													location.state)
-						.setLanguage("en").getGeocoderRequest();
-
                 try {
-				    geocoderResponse = geocoder.geocode(geocoderRequest);
-                } catch(IllegalArgumentException badRequestEx) {
+                    geocoderRequest = new GeocoderRequestBuilder().setAddress(
+                                                        (StringUtils.isNotBlank(location.streetAddress) ? location.streetAddress+", " : " ") +
+                                                        (StringUtils.isNotBlank(location.city) ? location.city+", " : " ") +
+                                                        location.state)
+                            .setLanguage("en").getGeocoderRequest();
+
+                    geocoderResponse = geocoder.geocode(geocoderRequest);
+                } catch(Throwable oops) {
+                    oops.printStackTrace(System.out);
                     return false;
                 }
+
 			}
 
 			if (geocoderResponse==null ||
