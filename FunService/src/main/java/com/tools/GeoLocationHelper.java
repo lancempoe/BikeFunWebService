@@ -51,7 +51,12 @@ public class GeoLocationHelper {
 													(StringUtils.isNotBlank(location.city) ? location.city+", " : " ") +
 													location.state)
 						.setLanguage("en").getGeocoderRequest();
-				geocoderResponse = geocoder.geocode(geocoderRequest);
+
+                try {
+				    geocoderResponse = geocoder.geocode(geocoderRequest);
+                } catch(IllegalArgumentException badRequestEx) {
+                    return false;
+                }
 			}
 
 			if (geocoderResponse==null ||
