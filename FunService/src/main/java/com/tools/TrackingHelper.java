@@ -116,7 +116,7 @@ public class TrackingHelper {
 	 * @throws Exception
 	 */
 	private static void setBikeRideTrackingDetails(BikeRide bikeRide, GeoLoc geoLoc, MongoCollection collection, Long clientHeartBeat) throws Exception {
-		bikeRide.distanceFromClient = GeoLocationHelper.distFrom(bikeRide.location.geoLoc, geoLoc); //TODO REPLACE ONCE JONGO .4 IS USED.
+		bikeRide.distanceFromClient = GoogleGeocoderApiHelper.distFrom(bikeRide.location.geoLoc, geoLoc); //TODO REPLACE ONCE JONGO .4 IS USED.
 
 		if (bikeRide.trackingAllowed) {
 			Iterable<Tracking> trackings = collection

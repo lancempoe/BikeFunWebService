@@ -18,12 +18,11 @@ public class User {
 
     @Id
 	public String id;
-    public String foreignId;
-    public String foreignIdType;
+    public OAuth oAuth;
 	public String userName;
 	public String email;
-	public List<DeviceAccounts> deviceAccounts = new ArrayList<DeviceAccounts>();
-    public DeviceAccounts deviceAccount = new DeviceAccounts();
+	public List<DeviceAccount> deviceAccounts = new ArrayList<DeviceAccount>();
+    public DeviceAccount deviceAccount = new DeviceAccount();
 	public boolean accountActivated = true;
 	public String imagePath;
 	public Long joinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();

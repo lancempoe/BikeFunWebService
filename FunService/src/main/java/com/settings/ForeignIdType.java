@@ -1,4 +1,4 @@
-package com.model;
+package com.settings;
 
 /**
  * Created with IntelliJ IDEA.

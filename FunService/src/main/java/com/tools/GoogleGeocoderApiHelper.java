@@ -22,7 +22,7 @@ import java.math.BigDecimal;
  * @author lancepoehler
  *
  */
-public class GeoLocationHelper {
+public class GoogleGeocoderApiHelper {
 
     private static final Log LOG = LogFactory.getLog(Geocoder.class);
 
@@ -44,7 +44,7 @@ public class GeoLocationHelper {
 			GeocodeResponse geocoderResponse=null;
 
 			//This will fail if it is not synchronized.  The classes are not threadsafe
-			synchronized(GeoLocationHelper.class) {
+			synchronized(GoogleGeocoderApiHelper.class) {
                 try {
                     final String address = buildAddressString(location);
                     if(address==null || StringUtils.isBlank(address)) {
@@ -115,7 +115,7 @@ public class GeoLocationHelper {
 				location.city = (bikeRide.location.city);
 				location.state = (bikeRide.location.state);
 				location.country = (bikeRide.location.country);
-				GeoLocationHelper.setGeoLocation(location); //Call API for city center geoCode
+				GoogleGeocoderApiHelper.setGeoLocation(location); //Call API for city center geoCode
 				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 				collection.save(location);
 			}

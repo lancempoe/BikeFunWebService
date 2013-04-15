@@ -26,12 +26,12 @@ public class PopulateDB {
 			//Add users
 			for(int i = 0; i < 4; i++) {
 				AnonymousUser au = new AnonymousUser();
-				au.deviceAccounts = new DeviceAccounts();
-				au.deviceAccounts.deviceUUID = UUID.randomUUID().toString();;
-				au.deviceAccounts.key = "1234";
+				au.deviceAccount = new DeviceAccount();
+				au.deviceAccount.deviceUUID = UUID.randomUUID().toString();;
+				au.deviceAccount.key = "1234";
 
 				webResource
-				.path("users/anonymous/"+au.deviceAccounts.key+"/"+au.deviceAccounts.deviceUUID)
+				.path("users/anonymous/"+au.deviceAccount.key+"/"+au.deviceAccount.deviceUUID)
 				.type("application/json")
 				.get(AnonymousUser.class);				
 			}

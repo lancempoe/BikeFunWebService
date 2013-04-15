@@ -9,7 +9,7 @@ import com.model.GeoLoc;
 import com.model.Location;
 import com.model.Root;
 import com.tools.CommonBikeRideCalls;
-import com.tools.GeoLocationHelper;
+import com.tools.GoogleGeocoderApiHelper;
 import com.tools.TrackingHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +47,7 @@ public class DisplayByTimeResource {
 	@GET
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}/rideLeaderId={rideLeaderId}")
 	public Root getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude, @PathParam("rideLeaderId") String rideLeaderId)  {
-		if (!GeoLocationHelper.isValidGeoLoc(latitude, longitude)) { return null; }
+		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
 
 		GeoLoc geoLoc = new GeoLoc();
 		geoLoc.latitude = latitude;
@@ -58,7 +58,7 @@ public class DisplayByTimeResource {
 	@GET
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
 	public Root getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
-		if (!GeoLocationHelper.isValidGeoLoc(latitude, longitude)) { return null; }
+		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
 
 		GeoLoc geoLoc = new GeoLoc();
 		geoLoc.latitude = latitude;

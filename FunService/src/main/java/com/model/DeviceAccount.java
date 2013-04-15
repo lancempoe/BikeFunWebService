@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement
-public class DeviceAccounts {
+public class DeviceAccount {
 
 	public String deviceUUID = "";
 	public String key = "";

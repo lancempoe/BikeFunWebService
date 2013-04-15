@@ -1,33 +1,18 @@
 //package com.resource.test;
 //
-//import java.awt.image.BufferedImage;
-//import java.io.File;
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.UUID;
-//
-//import com.resource.ImageResource;
+//import com.tools.GoogleGeocoderApiHelper;
 //import junit.framework.TestCase;
 //
-//import org.apache.commons.lang.StringUtils;
 //import org.joda.time.DateTime;
-//import org.jongo.MongoCollection;
 //import org.junit.Test;
 //
-//import com.db.MongoDatabase;
-//import com.db.MongoDatabase.MONGO_COLLECTIONS;
-//import com.model.AnonymousUser;
 //import com.model.BikeRide;
 //import com.model.Location;
 //import com.sun.jersey.api.client.Client;
-//import com.sun.jersey.api.client.ClientResponse;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
-//import com.tools.GeoLocationHelper;
-//
-//import javax.imageio.ImageIO;
 //
 ///**
 //* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
@@ -71,7 +56,7 @@
 //			location.streetAddress=("1000 SE Main St.");
 //			location.city=("Portland");
 //			location.state = ("OR");
-//			GeoLocationHelper.setGeoLocation(location);
+//			GoogleGeocoderApiHelper.setGeoLocation(location);
 //
 //			BikeRide bikeRide = webResource
 //					.path("bikerides/" + bikeRideID + "/geoloc="+location.geoLoc.latitude + "," + location.geoLoc.longitude)

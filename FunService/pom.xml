@@ -94,6 +94,11 @@
 			<artifactId>geocoder-java</artifactId>
 			<version>0.12</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-oauth2</artifactId>
+			<version>v2-rev32-1.14.1-beta</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>FunService</finalName>

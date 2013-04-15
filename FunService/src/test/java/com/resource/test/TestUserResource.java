@@ -2,15 +2,12 @@
 //
 //import java.util.UUID;
 //
+//import com.model.DeviceAccount;
 //import junit.framework.TestCase;
 //
-//import org.jongo.MongoCollection;
 //import org.junit.Test;
 //
-//import com.db.MongoDatabase;
-//import com.db.MongoDatabase.MONGO_COLLECTIONS;
 //import com.model.AnonymousUser;
-//import com.model.DeviceAccounts;
 //import com.sun.jersey.api.client.Client;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
@@ -50,12 +47,12 @@
 //		assertTrue(au != null);
 //
 //		AnonymousUser au2 = new AnonymousUser();
-//		au2.deviceAccounts = new DeviceAccounts();
-//		au2.deviceAccounts.deviceUUID = au.deviceAccounts.deviceUUID;
-//		au2.deviceAccounts.key = au.deviceAccounts.key;
+//		au2.deviceAccount = new DeviceAccount();
+//		au2.deviceAccount.deviceUUID = au.deviceAccount.deviceUUID;
+//		au2.deviceAccount.key = au.deviceAccount.key;
 //
 //		au2 = webResource
-//				.path("users/anonymous/"+au2.deviceAccounts.key+"/"+au2.deviceAccounts.deviceUUID)
+//				.path("users/anonymous/"+au2.deviceAccount.key+"/"+au2.deviceAccount.deviceUUID)
 //				.type("application/json")
 //				.get(AnonymousUser.class);
 //

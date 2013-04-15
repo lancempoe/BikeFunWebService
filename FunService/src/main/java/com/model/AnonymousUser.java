@@ -16,7 +16,7 @@ public class AnonymousUser {
 
 	@Id
 	public String id;
-	public DeviceAccounts deviceAccounts = new DeviceAccounts();
+	public DeviceAccount deviceAccount = new DeviceAccount();
     public String imagePath;
     public String userName = "Anonymous"; //User should never change.
 	public Long joinedTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();

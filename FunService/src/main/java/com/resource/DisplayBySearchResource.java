@@ -5,7 +5,7 @@ import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.*;
 import com.tools.CommonBikeRideCalls;
-import com.tools.GeoLocationHelper;
+import com.tools.GoogleGeocoderApiHelper;
 import com.tools.TrackingHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -34,7 +34,7 @@ public class DisplayBySearchResource {
 	@POST
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
 	public Root getDisplay(Query query, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) throws Exception {
-		if (!GeoLocationHelper.isValidGeoLoc(latitude, longitude)) { return null; }
+		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
 		if (query == null || 
 				(StringUtils.isBlank(query.query) && 
                  StringUtils.isBlank(query.targetAudience) &&

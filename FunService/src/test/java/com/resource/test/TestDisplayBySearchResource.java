@@ -1,35 +1,21 @@
 //package com.resource.test;
 //
-//import java.util.List;
-//import java.util.logging.Level;
 //import java.util.logging.Logger;
 //
+//import com.tools.GoogleGeocoderApiHelper;
 //import junit.framework.TestCase;
 //
-//import org.apache.commons.lang.StringUtils;
-//import org.joda.time.DateTime;
-//import org.joda.time.DateTimeZone;
-//import org.jongo.MongoCollection;
 //import org.junit.Test;
 //
-//import com.db.MongoDatabase;
-//import com.db.MongoDatabase.MONGO_COLLECTIONS;
-//import com.google.common.collect.Lists;
-//import com.model.BikeRide;
-//import com.model.GeoLoc;
 //import com.model.Location;
 //import com.model.Query;
 //import com.model.Root;
 //import com.shared.PopulateDB;
 //import com.sun.jersey.api.client.Client;
-//import com.sun.jersey.api.client.ClientResponse;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
-//import com.tools.CommonBikeRideCalls;
-//import com.tools.GeoLocationHelper;
-//import com.tools.TrackingHelper;
 //
 ///**
 //* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
@@ -73,7 +59,7 @@
 //		location.streetAddress = ("1000 SE Main St.");
 //		location.city = ("Portland");
 //		location.state = ("OR");
-//		GeoLocationHelper.setGeoLocation(location);
+//		GoogleGeocoderApiHelper.setGeoLocation(location);
 //
 //		Query query = new Query();
 //		query.query = "tacos";

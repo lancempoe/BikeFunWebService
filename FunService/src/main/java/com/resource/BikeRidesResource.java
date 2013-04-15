@@ -3,7 +3,8 @@ package com.resource;
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.*;
-import com.tools.GeoLocationHelper;
+import com.settings.SharedValues;
+import com.tools.GoogleGeocoderApiHelper;
 import com.tools.ImageHelper;
 import com.tools.SecurityTools;
 import com.tools.TrackingHelper;
@@ -41,7 +42,7 @@ public class BikeRidesResource {
 	@GET
 	@Path("{id}/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
 	public BikeRide getBikeRide(@PathParam("id") String id, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
-		if (!GeoLocationHelper.isValidGeoLoc(latitude, longitude)) { return null; }
+		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
 
 		GeoLoc geoLoc = new GeoLoc();
 		geoLoc.latitude = latitude;
@@ -93,8 +94,8 @@ public class BikeRidesResource {
             LOG.info("Received POST XML/JSON Request. New BikeRide request");
 
             //Validate real address:
-            if (GeoLocationHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
-                    GeoLocationHelper.setBikeRideLocationId(bikeRide)) {
+            if (GoogleGeocoderApiHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
+                    GoogleGeocoderApiHelper.setBikeRideLocationId(bikeRide)) {
 
                 bikeRide.imagePath = getImagePath(bikeRide.imagePath);
 
@@ -126,114 +127,130 @@ public class BikeRidesResource {
 
     /*
 	 * Allows the owner to update their rides.  Only updates if there are changes to the bike ride.
-	 * TODO: This security should be improved.  Maybe we could have a new key generated each and every time the app starts. 
 	 * @param bikeRide
 	 * @return
 	 */
-	@POST
-	@Path("update/{userId}/{key}/{deviceUUID}/")
-	public Response updateBikeRide(BikeRide updatedBikeRide, @PathParam("userId") String userId, @PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID)  {
-		Response response;
+    @POST
+    @Path("update")
+    public Response updateBikeRide(Root root)  {
+        Response response;
 		try {
 			LOG.info("Received POST XML/JSON Request. Update BikeRide request");
+            response = changeBikeRide(root, SharedValues.UpdateType.UPDATE_TYPE);
+		} catch (Exception e) {
+			LOG.error(e);
+			e.printStackTrace();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+		}
+		return response;
+	}
 
-			//Get the object and validate that the client has access to the ride.
-			MongoCollection collectionBikeRide = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-			BikeRide currentBikeRide = collectionBikeRide.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
+	@POST
+	@Path("delete")
+	public Response deleteBikeRide(Root root) throws Exception {
+		Response response;
+		try {
+			LOG.info("Received POST XML/JSON Request. Delete BikeRide request");
+            response = changeBikeRide(root, SharedValues.UpdateType.DELETE_TYPE);
+		} catch (Exception e) {
+			LOG.error(e);
+			e.printStackTrace();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+		}
+		return response;
+	}
 
-			//Validate that the client has access
-			if (currentBikeRide != null &&
-                SecurityTools.isValidUser(userId, key, deviceUUID) &&
-                SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
+    private Response changeBikeRide(Root root, SharedValues.UpdateType type) throws  Exception {
+        Response response;
+        String userId = "";
+        boolean validUser = false;
 
-				//Do not allow user to update rideLeaderId or cityLocationId; for now.
-				updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
-				Location updatedLocation = updatedBikeRide.location;
-				Location currentLocation = currentBikeRide.location;
+        if (root.AnonymousUser != null) {
+            userId = root.AnonymousUser.id;
+            validUser = SecurityTools.isValidAnonymousUser(userId,
+                    root.AnonymousUser.deviceAccount.key,
+                    root.AnonymousUser.deviceAccount.deviceUUID);
+        } else if (root.User != null && root.User.oAuth != null && root.User.deviceAccount != null) {
+            userId = root.User.id;
+            validUser = SecurityTools.isLoggedIn(root.User) && SecurityTools.isValidUser(userId, root.User.deviceAccount.deviceUUID);
+        }
 
-				if(
-						((updatedLocation.streetAddress == null) ? (currentLocation.streetAddress != null) : !updatedLocation.streetAddress.equals(currentLocation.streetAddress)) ||
-						((updatedLocation.city == null) ? (currentLocation.city != null) : !updatedLocation.city.equals(currentLocation.city)) ||
-						((updatedLocation.state == null) ? (currentLocation.state != null) : !updatedLocation.state.equals(currentLocation.state)) ||
-						((updatedLocation.zip == null) ? (currentLocation.zip != null) : !updatedLocation.zip.equals(currentLocation.zip)) ||
-						((updatedLocation.country == null) ? (currentLocation.country != null) : !updatedLocation.country.equals(currentLocation.country))
-						) {
+        //Validate that the client has access
+        if (validUser && root.BikeRides != null && root.BikeRides.size() == 1) {
 
-					//Validate real address:
-					if (!GeoLocationHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
-							!GeoLocationHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
-						return Response.status(Response.Status.BAD_REQUEST).build();
-					}
-				}
+            //Get the object and validate that the client has access to the ride.
+            MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
+            BikeRide updatedBikeRide = root.BikeRides.get(0);
+            BikeRide currentBikeRide = collectionBikeRides.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
 
-                if (!currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
-                  //Delete Old
-                  ImageHelper imageHelper = new ImageHelper();
-                  imageHelper.deleteImage(currentBikeRide.imagePath);
+            if (currentBikeRide != null && SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
 
-                  //Update to new image path
-                  updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
+                switch (type) {
+                    case UPDATE_TYPE:
+                        //Do not allow user to update rideLeaderId or cityLocationId
+                        updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
+                        Location updatedLocation = updatedBikeRide.location;
+                        Location currentLocation = currentBikeRide.location;
+
+                        if (
+                                ((updatedLocation.streetAddress == null) ? (currentLocation.streetAddress != null) : !updatedLocation.streetAddress.equals(currentLocation.streetAddress)) ||
+                                        ((updatedLocation.city == null) ? (currentLocation.city != null) : !updatedLocation.city.equals(currentLocation.city)) ||
+                                        ((updatedLocation.state == null) ? (currentLocation.state != null) : !updatedLocation.state.equals(currentLocation.state)) ||
+                                        ((updatedLocation.zip == null) ? (currentLocation.zip != null) : !updatedLocation.zip.equals(currentLocation.zip)) ||
+                                        ((updatedLocation.country == null) ? (currentLocation.country != null) : !updatedLocation.country.equals(currentLocation.country))
+                                ) {
+
+                            //Validate real address:
+                            if (!GoogleGeocoderApiHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
+                                    !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
+                                return Response.status(Response.Status.BAD_REQUEST).build();
+                            }
+                        }
+
+                        if (!currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
+                            //Delete Old
+                            ImageHelper imageHelper = new ImageHelper();
+                            imageHelper.deleteImage(currentBikeRide.imagePath);
+
+                            //Update to new image path
+                            updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
+                        }
+
+                        //update the object
+                        collectionBikeRides.save(updatedBikeRide);
+
+                        LOG.info("Update BikeRide: " + updatedBikeRide.id);
+                        break;
+                    case DELETE_TYPE:
+                        //Remove ride
+                        collectionBikeRides.remove(new ObjectId(currentBikeRide.id));
+
+                        //Remove ride image
+                        ImageHelper imageHelper = new ImageHelper();
+                        imageHelper.deleteImage(currentBikeRide.imagePath);
+
+                        int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
+                        updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
+
+                        response = Response.status(Response.Status.OK).build();
+
+                        LOG.info("Delete BikeRide: " + currentBikeRide.id);
+                        break;
                 }
-
-				//update the object
-                collectionBikeRide.save(updatedBikeRide);
 
                 //Update the user with updated active timestamp
                 updateLatestActiveTimeStamp(updatedBikeRide.rideLeaderId);
 
-				response = Response.status(Response.Status.OK).build();
-			} else {
-				//Invalid user for this ride.
-				response = Response.status(Response.Status.FORBIDDEN).build();
-			}
-		} catch (Exception e) {
-			LOG.error(e);
-			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
-		}
-		return response;
-	}
-
-	@POST
-	@Path("delete/{userId}/{key}/{deviceUUID}/")
-	public Response deleteBikeRide(BikeRide updatedBikeRide, @PathParam("userId") String userId, @PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID) throws Exception {
-		Response response;
-		try {
-			LOG.info("Received POST XML/JSON Request. Delete BikeRide request");
-
-			//Get the object and validate that the client has access to the ride.
-			MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-			BikeRide currentBikeRide = collectionBikeRides.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
-
-			//Validate that the client has access
-			if (currentBikeRide != null &&
-					SecurityTools.isValidUser(userId, key, deviceUUID) &&
-					SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
-
-                //Remove ride
-                collectionBikeRides.remove(new ObjectId(currentBikeRide.id));
-
-                //Remove ride image
-                ImageHelper imageHelper = new ImageHelper();
-                imageHelper.deleteImage(currentBikeRide.imagePath);
-
-                int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
-                updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
-
                 response = Response.status(Response.Status.OK).build();
-				LOG.info("Delete BikeRide: " + currentBikeRide.id);
-
-			} else {
-				//Client is not allowed to delete the selected role.
-				response = Response.status(Response.Status.FORBIDDEN).build();
-			}
-		} catch (Exception e) {
-			LOG.error(e);
-			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
-		}
-		return response;
-	}
+            } else {
+                response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+        } else {
+            //Invalid user for this ride.
+            response = Response.status(Response.Status.FORBIDDEN).build();
+        }
+        return response;
+    }
 
     private void updateTotalHostedBikeRideCount(String rideLeaderId, int totalHostedBikeRideCount) {
         try {

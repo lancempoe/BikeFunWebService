@@ -1,5 +1,6 @@
 //package com.resource.test;
 //
+//import com.tools.GoogleGeocoderApiHelper;
 //import junit.framework.TestCase;
 //
 //import org.junit.Test;
@@ -13,14 +14,13 @@
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
-//import com.tools.GeoLocationHelper;
 //
 ///**
-// * Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
-// * Start the DB as well: mongod
-// * @author lancepoehler
-// *
-// */
+//* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
+//* Start the DB as well: mongod
+//* @author lancepoehler
+//*
+//*/
 //public class TestDisplayByProximityResource extends TestCase { //extends JerseyTest {
 //
 //	protected static final String WEB_APP_NAME = "FunService";
@@ -32,7 +32,7 @@
 //		ClientConfig cc = new DefaultClientConfig();
 //		cc.getProperties().put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, true);
 //		//TO use POJO Json clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-//		return cc;	
+//		return cc;
 //	}
 //
 //	@Test
@@ -55,7 +55,7 @@
 //		location.streetAddress = ("1000 SE Main St.");
 //		location.city = ("Portland");
 //		location.state = ("OR");
-//		GeoLocationHelper.setGeoLocation(location);
+//		GoogleGeocoderApiHelper.setGeoLocation(location);
 //
 //		Root root = webResource
 //				.path("display/by_proximity/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
@@ -69,7 +69,7 @@
 //		location.streetAddress = ("1224 2nd Street Northwest");
 //		location.city = ("SALEM");
 //		location.state = ("OR");
-//		GeoLocationHelper.setGeoLocation(location);
+//		GoogleGeocoderApiHelper.setGeoLocation(location);
 //
 //		root = webResource
 //				.path("display/by_proximity/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)

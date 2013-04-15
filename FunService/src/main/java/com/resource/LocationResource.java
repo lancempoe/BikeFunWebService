@@ -4,7 +4,7 @@ import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.Location;
-import com.tools.GeoLocationHelper;
+import com.tools.GoogleGeocoderApiHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.types.ObjectId;
@@ -38,7 +38,7 @@ public class LocationResource {
 		try {
 			LOG.info("Received POST XML/JSON Request. New Location request");
 
-			if (GeoLocationHelper.setGeoLocation(location))
+			if (GoogleGeocoderApiHelper.setGeoLocation(location))
 			{
 				//Save the object using Jongo
 				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
