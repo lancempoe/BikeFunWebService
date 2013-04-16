@@ -1,5 +1,7 @@
 package com.tools;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import java.util.Date;
@@ -17,5 +19,20 @@ public class TestTools {
 
 		assertTrue(now.equals(newNow));
 	}
+
+    @Test
+    public void testDateToLongToStringRoundTrip() throws Exception {
+
+        //Date to long
+        Long myLong = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+
+        //Long to string
+        String myString = myLong.toString();
+
+        //String to a long
+        Long myReturnedLong = Long.parseLong(myString);
+
+        assertTrue(myLong.equals(myReturnedLong));
+    }
 
 }
