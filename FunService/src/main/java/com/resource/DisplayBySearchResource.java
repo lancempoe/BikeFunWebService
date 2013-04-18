@@ -16,6 +16,7 @@ import org.jongo.MongoCollection;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 
 /**
@@ -33,18 +34,25 @@ public class DisplayBySearchResource {
 
 	@POST
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
-	public Root getDisplay(Query query, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) throws Exception {
-		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
-		if (query == null || 
-				(StringUtils.isBlank(query.query) && 
-                 StringUtils.isBlank(query.targetAudience) &&
-                 StringUtils.isBlank(query.cityLocationId) &&
-                 StringUtils.isBlank(query.rideLeaderId))) { return null; }
-
-		GeoLoc geoLoc = new GeoLoc();
-		geoLoc.latitude = latitude;
-		geoLoc.longitude = longitude;
-		return getDisplay(geoLoc, query);
+	public Response getDisplay(Query query, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) throws Exception {
+		Response response;
+        if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+            if (query == null ||
+                    (StringUtils.isBlank(query.query) &&
+                     StringUtils.isBlank(query.targetAudience) &&
+                     StringUtils.isBlank(query.cityLocationId) &&
+                     StringUtils.isBlank(query.rideLeaderId))) {
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Query Values.  No Values Passed").build();
+            } else {
+                GeoLoc geoLoc = new GeoLoc();
+                geoLoc.latitude = latitude;
+                geoLoc.longitude = longitude;
+                response = getDisplay(geoLoc, query);
+            }
+        } else {
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
+        }
+        return response;
 	}
 
 	/**
@@ -56,11 +64,12 @@ public class DisplayBySearchResource {
 	 * @return
 	 * @throws Exception
 	 */
-	private Root getDisplay(GeoLoc geoLoc, Query query) throws Exception {
-
-		Root root = new Root();
-		try 
+	private Response getDisplay(GeoLoc geoLoc, Query query) throws Exception {
+        Response response;
+		try
 		{
+            Root root = new Root();
+
 			DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
 			Long yesterday = todayDateTime.minusDays(1).getMillis();  //
 			MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
@@ -104,17 +113,16 @@ public class DisplayBySearchResource {
 
 			//**(Set tracking on bike rides: 2 DB call)
 			TrackingHelper.setTracking(root.BikeRides, geoLoc);
-
+            response = Response.status(Response.Status.OK).entity(root).build();
 		}
 		catch (Exception e)
 		{
 			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
-			return null;
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 
-		//**(Return Root)**
-		return root;
+		return response;
 	}
 
 }

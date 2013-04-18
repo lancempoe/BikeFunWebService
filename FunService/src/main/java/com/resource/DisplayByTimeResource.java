@@ -48,23 +48,31 @@ public class DisplayByTimeResource {
 	@GET
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}/rideLeaderId={rideLeaderId}")
 	public Response getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude, @PathParam("rideLeaderId") String rideLeaderId)  {
-		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
-
-		GeoLoc geoLoc = new GeoLoc();
-		geoLoc.latitude = latitude;
-		geoLoc.longitude = longitude;
-		return getDisplayForClient(geoLoc, rideLeaderId);
+        Response response;
+        if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+            GeoLoc geoLoc = new GeoLoc();
+            geoLoc.latitude = latitude;
+            geoLoc.longitude = longitude;
+            response = getDisplayForClient(geoLoc, rideLeaderId);
+        } else {
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
+        }
+        return response;
 	}
 
 	@GET
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
 	public Response getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
-		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
-
-		GeoLoc geoLoc = new GeoLoc();
-		geoLoc.latitude = latitude;
-		geoLoc.longitude = longitude;
-		return getDisplay(geoLoc, null);
+        Response response;
+        if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+            GeoLoc geoLoc = new GeoLoc();
+            geoLoc.latitude = latitude;
+            geoLoc.longitude = longitude;
+            response = getDisplay(geoLoc, null);
+        } else {
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
+        }
+        return response;
 	}
 
 	/**

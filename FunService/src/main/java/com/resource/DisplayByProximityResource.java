@@ -20,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -40,13 +41,17 @@ public class DisplayByProximityResource {
 
 	@GET
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
-	public Root getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) throws Exception {
-		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
-
-		GeoLoc geoLoc = new GeoLoc();
-		geoLoc.latitude = latitude;
-		geoLoc.longitude = longitude;
-		return getDisplay(geoLoc);
+	public Response getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) throws Exception {
+        Response response;
+        if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+            GeoLoc geoLoc = new GeoLoc();
+            geoLoc.latitude = latitude;
+            geoLoc.longitude = longitude;
+            response = getDisplay(geoLoc);
+        } else {
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
+        }
+        return response;
 	}
 
 	/**
@@ -63,17 +68,18 @@ public class DisplayByProximityResource {
 	 * - Currently the Data Modeling Decision is to use References instead of embedding them.
 	 *   If we find that the response time is an issue we can migrate to an embedded approach.
 	 *   See: http://docs.mongodb.org/manual/core/data-modeling/
-	 * @param geoLoc
-	 * @param selectedLocation
-	 * @return
-	 * @throws Exception 
-	 */
-	private Root getDisplay(GeoLoc geoLoc) throws Exception {
+     * @param geoLoc
+     * @return
+     * @throws Exception
+     */
+	private Response getDisplay(GeoLoc geoLoc) throws Exception {
+        Response response;
 
-		Root root = new Root();
-		try 
+        try
 		{
-			//**(Identify the closest city to the client: 1 DB Call)**
+            Root root = new Root();
+
+            //**(Identify the closest city to the client: 1 DB Call)**
 			MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "geoLoc");
 			//coll.ensureIndex("{geoLoc: '2d'}") is set when getting the collection
 			Location closestLocation = locationCollection
@@ -116,14 +122,16 @@ public class DisplayByProximityResource {
 					root.BikeRides.add(closeBikeRide);
 				}
 			}
+
+            response = Response.status(Response.Status.OK).entity(root).build();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			LOG.error("DisplayByProximity Failed", e);
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 
-		//**(Return Root)**
-		return root;
+		return response;
 	}
 }

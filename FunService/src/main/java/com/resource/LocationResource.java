@@ -43,50 +43,59 @@ public class LocationResource {
 				//Save the object using Jongo
 				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 				collection.save(location);
-				response = Response.status(Response.Status.OK).build();
+                response = Response.status(Response.Status.OK).entity(location).build();
 			} else {
-				response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Address").build();
 			}
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 		return response;
 	}
 
 	@GET
 	@Path("{id}")
-	public Location getLocation(@PathParam("id") String id) throws Exception {
-		Location location = null;
+	public Response getLocation(@PathParam("id") String id) throws Exception {
+        Response response;
 		try {
+            Location location = null;
+
 			//Get the object using Jongo
 			MongoCollection coll = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 			location = coll.findOne(new ObjectId(id)).as(Location.class);
+
+            response = Response.status(Response.Status.OK).entity(location).build();
 		}
 		catch (Exception e) {
 			LOG.error("Exception Error when getting user: ", e);
 			e.printStackTrace();
-			throw e;
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		} 
-		return location;
+		return response;
 	}
 
 	@GET
-	public List<Location> getLocations() throws Exception {
-		List<Location> locations = null;
-		try 
+	public Response getLocations() throws Exception {
+		Response response;
+        try
 		{
+		    List<Location> locations = null;
+
 			//Get the objects using Jongo
 			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 			Iterable<Location> all = usersCollection.find().as(Location.class);		
 			locations = Lists.newArrayList(all);
+
+            response = Response.status(Response.Status.OK).entity(locations).build();
 		}
 		catch (Exception e)
 		{
 			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		} 
-		return locations;
+		return response;
 	}
 }

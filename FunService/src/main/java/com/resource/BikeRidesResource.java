@@ -41,13 +41,17 @@ public class BikeRidesResource {
 
 	@GET
 	@Path("{id}/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
-	public BikeRide getBikeRide(@PathParam("id") String id, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
-		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
-
-		GeoLoc geoLoc = new GeoLoc();
-		geoLoc.latitude = latitude;
-		geoLoc.longitude = longitude;
-		return getRide(id, geoLoc);
+	public Response getBikeRide(@PathParam("id") String id, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
+        Response response;
+        if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+            GeoLoc geoLoc = new GeoLoc();
+            geoLoc.latitude = latitude;
+            geoLoc.longitude = longitude;
+            response = getRide(id, geoLoc);
+        } else {
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
+        }
+        return response;
 	}
 
 	/**
@@ -57,11 +61,13 @@ public class BikeRidesResource {
 	 * @return
 	 * @throws Exception
 	 */
-	private BikeRide getRide(String id, GeoLoc geoLoc) {
-		BikeRide bikeRide = null;
-		try 
-		{			
-			//Get the object using Jongo
+	private Response getRide(String id, GeoLoc geoLoc) {
+        Response response = null;
+        try
+		{
+            BikeRide bikeRide = null;
+
+            //Get the object using Jongo
 			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 			bikeRide = collection.findOne(new ObjectId(id)).as(BikeRide.class);
 
@@ -76,19 +82,22 @@ public class BikeRidesResource {
 
 				//Get all current tracks
 				bikeRide.currentTrackings = TrackingHelper.getAllCurrentTrackings(bikeRide);
+
+                response = Response.status(Response.Status.OK).entity(bikeRide).build();
 			}
 		}
 		catch (Exception e)
 		{
 			LOG.info("Exception Error when getting user: " + e.getMessage());
 			e.printStackTrace();
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
-		return bikeRide;
+		return response;
 	}
 
     @POST
     @Path("new")
-    public BikeRide newBikeRide(BikeRide bikeRide) {
+    public Response newBikeRide(BikeRide bikeRide) {
         Response response;
         try {
             LOG.info("Received POST XML/JSON Request. New BikeRide request");
@@ -107,22 +116,20 @@ public class BikeRidesResource {
                 updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
 
                 LOG.error("Not an error, but hey, we've got a new bikeride! id="+bikeRide.id);
-                response = Response.status(Response.Status.OK).build();
-                //Send back the bikeRide so the ID can be obtained
+                response = Response.status(Response.Status.OK).entity(bikeRide).build();
 
             } else {
                 //Invalid address
                 LOG.info("Invalid address, we're not making the ride sucker!");
-                response = Response.status(Response.Status.CONFLICT).build();
+                response = Response.status(Response.Status.CONFLICT).entity("Invalid Address").build();
             }
 
         } catch (Exception e) {
             LOG.error(e.getMessage());
             e.printStackTrace();
-            response = Response.status(Response.Status.PRECONDITION_FAILED).build();
-            //TODO NEED TO SEND BACK SOMETHING ELSE.
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
         }
-        return bikeRide;
+        return response;
     }
 
     /*
@@ -140,7 +147,7 @@ public class BikeRidesResource {
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 		return response;
 	}
@@ -155,13 +162,13 @@ public class BikeRidesResource {
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 		return response;
 	}
 
     private Response changeBikeRide(Root root, SharedValues.UpdateType type) throws  Exception {
-        Response response;
+        Response response = null;
         String userId = "";
         boolean validUser = false;
 
@@ -219,6 +226,8 @@ public class BikeRidesResource {
                         //update the object
                         collectionBikeRides.save(updatedBikeRide);
 
+                        response = Response.status(Response.Status.OK).entity(updatedBikeRide).build();
+
                         LOG.info("Update BikeRide: " + updatedBikeRide.id);
                         break;
                     case DELETE_TYPE:
@@ -232,7 +241,7 @@ public class BikeRidesResource {
                         int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
                         updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
 
-                        response = Response.status(Response.Status.OK).build();
+                        response = Response.status(Response.Status.OK).entity("Bike Ride Deleted").build();
 
                         LOG.info("Delete BikeRide: " + currentBikeRide.id);
                         break;
@@ -241,13 +250,12 @@ public class BikeRidesResource {
                 //Update the user with updated active timestamp
                 updateLatestActiveTimeStamp(updatedBikeRide.rideLeaderId);
 
-                response = Response.status(Response.Status.OK).build();
             } else {
-                response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Bike Ride").build();
             }
         } else {
             //Invalid user for this ride.
-            response = Response.status(Response.Status.FORBIDDEN).build();
+            response = Response.status(Response.Status.FORBIDDEN).entity("Error: No Access").build();
         }
         return response;
     }

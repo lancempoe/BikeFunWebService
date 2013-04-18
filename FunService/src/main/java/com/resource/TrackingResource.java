@@ -37,11 +37,11 @@ public class TrackingResource {
 			MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 			collection.save(tracking);
 
-			response = Response.status(Response.Status.OK).build();
+			response = Response.status(Response.Status.OK).entity(tracking).build();
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).build();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 		return response;
 	}
