@@ -1,32 +1,30 @@
 //package com.resource.test;
 //
-//import java.util.logging.Logger;
-//
-//import org.junit.Test;
-//
-//import junit.framework.TestCase;
-//
 //import com.shared.PopulateDB;
 //import com.sun.jersey.api.client.Client;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
+//import junit.framework.TestCase;
+//import org.junit.Test;
+//
+//import java.util.logging.Logger;
 //
 //public class TestDBHeavyLoad extends TestCase {
 //
 //	private static final Logger LOG = Logger.getLogger(TestDBHeavyLoad.class.getCanonicalName());
 //
 //	protected static final String WEB_APP_NAME = "FunService";
-//	//protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
-//	protected static final String BASE_URI = "http://24.21.204.4/" + WEB_APP_NAME; //Test
+//	protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
+//	//protected static final String BASE_URI = "http:www.bikefunfinder.com/" + WEB_APP_NAME; //Test
 //	protected static final String REST_URI = BASE_URI + "/" + "rest";
 //
 //	protected ClientConfig getDefaultClientConfig() {
 //		ClientConfig cc = new DefaultClientConfig();
 //		cc.getProperties().put(ClientConfig.PROPERTY_FOLLOW_REDIRECTS, true);
 //		//TO use POJO Json clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-//		return cc;	
+//		return cc;
 //	}
 //
 //	@Test
@@ -66,7 +64,7 @@
 //				}
 //			} catch (Exception e) {
 //				e.printStackTrace();
-//			}	
+//			}
 //		}
 //	}
 //}

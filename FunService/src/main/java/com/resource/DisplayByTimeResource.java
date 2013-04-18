@@ -22,6 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
@@ -46,7 +47,7 @@ public class DisplayByTimeResource {
 	 */
 	@GET
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}/rideLeaderId={rideLeaderId}")
-	public Root getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude, @PathParam("rideLeaderId") String rideLeaderId)  {
+	public Response getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude, @PathParam("rideLeaderId") String rideLeaderId)  {
 		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
 
 		GeoLoc geoLoc = new GeoLoc();
@@ -57,7 +58,7 @@ public class DisplayByTimeResource {
 
 	@GET
 	@Path("geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
-	public Root getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
+	public Response getDisplay(@PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
 		if (!GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) { return null; }
 
 		GeoLoc geoLoc = new GeoLoc();
@@ -81,16 +82,16 @@ public class DisplayByTimeResource {
 	 *   The main reason for this is that Location and user would be replicate all over the place.
 	 *   If we find that the response time is an issue we can migrate to an embedded approach.
 	 *   See: http://docs.mongodb.org/manual/core/data-modeling/
-	 * @param geoLoc
-	 * @param selectedLocation
-	 * @return
-	 * @throws Exception 
-	 */
-	private Root getDisplay(GeoLoc geoLoc, String selectedLocationId) {
-
-		Root root = new Root();
+     * @param geoLoc
+     * @param selectedLocationId
+     * @return
+     */
+	private Response getDisplay(GeoLoc geoLoc, String selectedLocationId) {
+        Response response;
 		try 
 		{
+            Root root = new Root();
+
 			DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
 			Long yesterday = todayDateTime.minusDays(1).getMillis();  //
 			MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
@@ -116,17 +117,16 @@ public class DisplayByTimeResource {
 
 			//**(Set tracking on bike rides: 2 DB call)
 			TrackingHelper.setTracking(root.BikeRides, geoLoc);
-
+            response = Response.status(Response.Status.OK).entity(root).build();
 		}
 		catch (Exception e)
 		{
 			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
-			return null;
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 
-		//**(Return Root)**
-		return root;
+		return response;
 	}
 
     private Iterable<BikeRide> getRidesFromDB(String closetsLocationId, Long yesterday, MongoCollection bikeCollection) {
@@ -157,10 +157,11 @@ public class DisplayByTimeResource {
 	 * @return
 	 * @throws Exception
 	 */
-	private Root getDisplayForClient(GeoLoc geoLoc, String rideLeaderId) {
-		Root root = new Root();
+	private Response getDisplayForClient(GeoLoc geoLoc, String rideLeaderId) {
+        Response response;
 		try 
 		{
+            Root root = new Root();
 			MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 
 			///Find all bike rides for the client
@@ -175,16 +176,15 @@ public class DisplayByTimeResource {
 
 			//**(Set tracking on bike rides: 2 DB call)
 			TrackingHelper.setTracking(root.BikeRides, geoLoc);
-
+            response = Response.status(Response.Status.OK).entity(root).build();
 		}
 		catch (Exception e)
 		{
 			LOG.error("Exception Error: ", e);
 			e.printStackTrace();
-			return null;
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
 		}
 
-		//**(Return Root)**
-		return root;
+		return response;
 	}
 }

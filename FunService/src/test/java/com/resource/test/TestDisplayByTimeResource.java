@@ -1,17 +1,18 @@
 //package com.resource.test;
 //
-//import com.tools.GoogleGeocoderApiHelper;
-//import junit.framework.TestCase;
-//
-//import org.junit.Test;
-//
+//import com.model.BikeRide;
 //import com.model.Location;
 //import com.model.Root;
 //import com.sun.jersey.api.client.Client;
+//import com.sun.jersey.api.client.ClientResponse;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
+//import com.tools.GoogleGeocoderApiHelper;
+//import junit.framework.TestCase;
+//import org.jongo.MongoCollection;
+//import org.junit.Test;
 //
 ///**
 //* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
@@ -52,10 +53,16 @@
 //		location.state = ("OR");
 //		GoogleGeocoderApiHelper.setGeoLocation(location);
 //
-//		Root root = webResource
+//        ClientResponse response = webResource
 //				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
 //				.type("application/json")
-//				.get(Root.class);
+//				.get(ClientResponse.class);
+//
+//        final int statusCode = response.getStatus();
+//        if ((statusCode < 200) || (statusCode >= 300)) {
+//            String message = "What?!?!";
+//        }
+//        Root root = response.getEntity(Root.class);
 //
 //		assertTrue(root.BikeRides.size() == 8); //1 is in salem and one is more than 1 day old
 //		assertTrue(root.ClosestLocation.city.equals("Portland"));
