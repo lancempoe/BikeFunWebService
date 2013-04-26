@@ -194,7 +194,7 @@ public class BikeRidesResource {
 
                 switch (type) {
                     case UPDATE_TYPE:
-                        //Do not allow user to update rideLeaderId or cityLocationId
+                        //Do not allow user to update rideLeaderId or cityLocation
                         updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
                         Location updatedLocation = updatedBikeRide.location;
                         Location currentLocation = currentBikeRide.location;

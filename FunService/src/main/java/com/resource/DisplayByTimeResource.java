@@ -139,12 +139,12 @@ public class DisplayByTimeResource {
 
     private Iterable<BikeRide> getRidesFromDB(String closetsLocationId, Long yesterday, MongoCollection bikeCollection) {
         return bikeCollection
-                            .find("{rideStartTime: {$gt: #}, cityLocationId: #}",
+                            .find("{rideStartTime: {$gt: #}, cityLocation: #}",
                                     yesterday,
                                     closetsLocationId)
                             .sort("{rideStartTime : 1}")
                             .limit(200)
-                            .fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+                            .fields("{cityLocation: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
                             .as(BikeRide.class);
     }
 
@@ -154,7 +154,7 @@ public class DisplayByTimeResource {
                         yesterday)
                 .sort("{rideStartTime : 1}")
                 .limit(200)
-                .fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+                .fields("{cityLocation: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
                 .as(BikeRide.class);
     }
 
@@ -178,7 +178,7 @@ public class DisplayByTimeResource {
 							rideLeaderId)
 					.sort("{rideStartTime : -1}")
 					.limit(200)
-					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.fields("{cityLocation: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 

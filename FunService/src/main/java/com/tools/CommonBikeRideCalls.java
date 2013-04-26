@@ -27,7 +27,7 @@ public class CommonBikeRideCalls {
 	 */
 	public static Location getClosestActiveLocation(GeoLoc geoLoc, MongoCollection bikeCollection, Long yesterday) throws Exception {
 		Iterable<String> all = bikeCollection
-				.distinct("cityLocationId")
+				.distinct("cityLocation")
 				.query("{rideStartTime: {$gt: #}}", 
 						yesterday)
 						.as(String.class);

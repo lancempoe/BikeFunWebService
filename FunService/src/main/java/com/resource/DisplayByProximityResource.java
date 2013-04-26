@@ -109,7 +109,7 @@ public class DisplayByProximityResource {
 							RADIUS_IN_MILES/ONE_DEGREE_IN_MILES,
 							max ,
 							min )
-					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.		
+					.fields("{cityLocation: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
 					.as(BikeRide.class);
 			List<BikeRide> closeBikeRides = Lists.newArrayList(all);
 

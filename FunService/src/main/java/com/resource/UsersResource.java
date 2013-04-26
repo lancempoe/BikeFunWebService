@@ -33,7 +33,6 @@ import java.util.UUID;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes (MediaType.APPLICATION_JSON)
 public class UsersResource {
 
     private static final Log LOG = LogFactory.getLog(UsersResource.class);
@@ -90,6 +89,7 @@ public class UsersResource {
      * @return
      */
     @POST
+    @Consumes (MediaType.APPLICATION_JSON)
     public Response getUser(User submittedUser) {
         Response response;
 
@@ -158,6 +158,7 @@ public class UsersResource {
 
     @POST
     @Path("update")
+    @Consumes (MediaType.APPLICATION_JSON)
     public Response updateUser(User user)  {
         Response response;
         try {

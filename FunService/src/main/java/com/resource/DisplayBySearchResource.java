@@ -40,7 +40,7 @@ public class DisplayBySearchResource {
             if (query == null ||
                     (StringUtils.isBlank(query.query) &&
                      StringUtils.isBlank(query.targetAudience) &&
-                     StringUtils.isBlank(query.cityLocationId) &&
+                     StringUtils.isBlank(query.cityLocation) &&
                      StringUtils.isBlank(query.rideLeaderId))) {
                 response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Query Values.  No Values Passed").build();
             } else {
@@ -77,8 +77,9 @@ public class DisplayBySearchResource {
 			Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
 			root.ClosestLocation = closestLocation;
 
-			if (StringUtils.isEmpty(query.cityLocationId)) {
-				query.cityLocationId = closestLocation.id;
+            //TODO NEED TO CHANGE SO THAT YOU SEARCH FOR LOCATION ID FROM CITY NAME PROVIDED.
+			if (StringUtils.isEmpty(query.cityLocation)) {
+				query.cityLocation = closestLocation.id;
 			}
 			
 			DateTime filterStartDateTime = null;
@@ -98,7 +99,7 @@ public class DisplayBySearchResource {
 			//Build the remaining query
 			String queryAsString = "{";
             if(StringUtils.isNotBlank(query.rideLeaderId)) { queryOrString += "rideLeaderId: '" + query.rideLeaderId+"'"; }
-            if(StringUtils.isNotBlank(query.cityLocationId)) { queryOrString += "cityLocationId: '" + query.cityLocationId+"'"; }
+            if(StringUtils.isNotBlank(query.cityLocation)) { queryOrString += "cityLocation: '" + query.cityLocation +"'"; }
 			if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += ", targetAudience: '"+query.targetAudience+"'"; }
 			if(filterStartDateTime != null) { queryAsString += ", rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}"; }
 			queryAsString += "}";		 
@@ -107,7 +108,7 @@ public class DisplayBySearchResource {
 					.find(queryAsString)
 					.sort("{rideStartTime : 1}")
 					.limit(200)
-					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.fields("{cityLocation: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 
