@@ -18,6 +18,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is used for querying the db for a particular ride or type of ride.
@@ -40,7 +42,7 @@ public class DisplayBySearchResource {
             if (query == null ||
                     (StringUtils.isBlank(query.query) &&
                      StringUtils.isBlank(query.targetAudience) &&
-                     StringUtils.isBlank(query.cityLocation) &&
+                     StringUtils.isBlank(query.city) &&
                      StringUtils.isBlank(query.rideLeaderId))) {
                 response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Query Values.  No Values Passed").build();
             } else {
@@ -70,17 +72,30 @@ public class DisplayBySearchResource {
 		{
             Root root = new Root();
 
-			DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
-			Long yesterday = todayDateTime.minusDays(1).getMillis();  //
 			MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 
-			Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
-			root.ClosestLocation = closestLocation;
+            List<Location> locations = new ArrayList<Location>();
+            String locationQuery = "";
+			if (StringUtils.isEmpty(query.city)) {
+                DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
+                Long yesterday = todayDateTime.minusDays(1).getMillis();
+                Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
+                root.ClosestLocation = closestLocation;
+                locations.add(closestLocation);
+			} else {
+                MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 
-            //TODO NEED TO CHANGE SO THAT YOU SEARCH FOR LOCATION ID FROM CITY NAME PROVIDED.
-			if (StringUtils.isEmpty(query.cityLocation)) {
-				query.cityLocation = closestLocation.id;
-			}
+                ///Find all matching locations
+                Iterable<Location> locationsIterable = locationCollection
+                        .find("{ city: {$regex: '.*"+query.city +".*', $options: 'i'}}")
+                        .limit(200)
+                        .as(Location.class);
+                locations = Lists.newArrayList(locationsIterable);
+            }
+            for (Location location : locations) {
+                locationQuery += ", \"" + location.id + "\"";
+            }
+            locationQuery = locationQuery.substring(2);
 			
 			DateTime filterStartDateTime = null;
 			DateTime filterEndDateTime = null;
@@ -90,25 +105,21 @@ public class DisplayBySearchResource {
 				filterEndDateTime = filterStartDateTime.plusDays(1);
 			}
 
-			//Build the OR query
-			String queryOrString = "";
-			if(StringUtils.isNotBlank(query.query)) {
-				queryOrString += "$or: [{ bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'}}, { details: {$regex: '.*"+query.query+".*', $options: 'i'}}], "; 
-			}
+            //Build the query
+            String queryAsString = "{$and: [";
+            if(StringUtils.isNotBlank(query.rideLeaderId)) { queryAsString += "{rideLeaderId: '" + query.rideLeaderId+"'}, "; }
+            if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [{ bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'}}, { details: {$regex: '.*"+query.query+".*', $options: 'i'}}]}, "; }
+            if(StringUtils.isNotBlank(query.city)) { queryAsString += "{cityLocationId: { $all: [ " + locationQuery + " ]}}, "; }
+            if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += "{targetAudience: '" + query.targetAudience+"'}, "; }
+            if(filterStartDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}}, "; }
+            queryAsString = queryAsString.substring(0, queryAsString.length() - 2) + "]}";
 
-			//Build the remaining query
-			String queryAsString = "{";
-            if(StringUtils.isNotBlank(query.rideLeaderId)) { queryOrString += "rideLeaderId: '" + query.rideLeaderId+"'"; }
-            if(StringUtils.isNotBlank(query.cityLocation)) { queryOrString += "cityLocation: '" + query.cityLocation +"'"; }
-			if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += ", targetAudience: '"+query.targetAudience+"'"; }
-			if(filterStartDateTime != null) { queryAsString += ", rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}"; }
-			queryAsString += "}";		 
 
 			Iterable<BikeRide> bikeRides = bikeCollection
 					.find(queryAsString)
 					.sort("{rideStartTime : 1}")
 					.limit(200)
-					.fields("{cityLocation: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 

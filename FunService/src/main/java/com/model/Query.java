@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Query {
 
 	public String query;
-	public String cityLocation; //If not provided then use current location
+	public String city; //If not provided then use current location
 	public Long date;
 	public String targetAudience;
     public String rideLeaderId;

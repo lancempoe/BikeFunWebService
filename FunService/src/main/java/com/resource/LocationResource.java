@@ -26,13 +26,13 @@ import java.util.List;
  */
 @Path("/locations")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes (MediaType.APPLICATION_JSON)
 public class LocationResource {
     private static final Log LOG = LogFactory.getLog(LocationResource.class);
 
 
 	@POST
 	@Path("new")
+    @Consumes (MediaType.APPLICATION_JSON)
 	public Response newLocation(Location location) {
 		Response response;
 		try {
@@ -84,8 +84,8 @@ public class LocationResource {
 		    List<Location> locations = null;
 
 			//Get the objects using Jongo
-			MongoCollection usersCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
-			Iterable<Location> all = usersCollection.find().as(Location.class);		
+			MongoCollection locationsCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
+			Iterable<Location> all = locationsCollection.find().as(Location.class);
 			locations = Lists.newArrayList(all);
 
             response = Response.status(Response.Status.OK).entity(locations).build();

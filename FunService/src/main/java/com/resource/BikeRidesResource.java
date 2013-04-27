@@ -35,7 +35,6 @@ import java.util.UUID;
  */
 @Path("/bikerides")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes (MediaType.APPLICATION_JSON)
 public class BikeRidesResource {
     private static final Log LOG = LogFactory.getLog(BikeRidesResource.class);
 
@@ -97,6 +96,7 @@ public class BikeRidesResource {
 
     @POST
     @Path("new")
+    @Consumes (MediaType.APPLICATION_JSON)
     public Response newBikeRide(BikeRide bikeRide) {
         Response response;
         try {
@@ -139,6 +139,7 @@ public class BikeRidesResource {
 	 */
     @POST
     @Path("update")
+    @Consumes (MediaType.APPLICATION_JSON)
     public Response updateBikeRide(Root root)  {
         Response response;
 		try {
@@ -154,6 +155,7 @@ public class BikeRidesResource {
 
 	@POST
 	@Path("delete")
+    @Consumes (MediaType.APPLICATION_JSON)
 	public Response deleteBikeRide(Root root) throws Exception {
 		Response response;
 		try {
@@ -194,7 +196,7 @@ public class BikeRidesResource {
 
                 switch (type) {
                     case UPDATE_TYPE:
-                        //Do not allow user to update rideLeaderId or cityLocation
+                        //Do not allow user to update rideLeaderId or cityLocationId
                         updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
                         Location updatedLocation = updatedBikeRide.location;
                         Location currentLocation = currentBikeRide.location;
