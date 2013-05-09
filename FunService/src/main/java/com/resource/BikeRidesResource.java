@@ -72,16 +72,7 @@ public class BikeRidesResource {
 
 			//build tracking items.
 			if (bikeRide != null) {
-				//Get the distance from the client, if the ride is 
-				//currently tracking, and total people that have at one time tracked this ride.
-				TrackingHelper.setTracking(bikeRide, geoLoc);
-
-				//Get leader tracking
-				bikeRide.rideLeaderTracking = TrackingHelper.getRideLeaderTracking(bikeRide);
-
-				//Get all current tracks
-				bikeRide.currentTrackings = TrackingHelper.getAllCurrentTrackings(bikeRide);
-
+				bikeRide = postBikeRideDBUpdates(bikeRide, geoLoc);
                 response = Response.status(Response.Status.OK).entity(bikeRide).build();
 			}
 		}
@@ -94,34 +85,59 @@ public class BikeRidesResource {
 		return response;
 	}
 
+    private BikeRide postBikeRideDBUpdates(BikeRide bikeRide, GeoLoc geoLoc) throws Exception {
+
+        //Get the distance from the client, if the ride is
+        //currently tracking, and total people that have at one time tracked this ride.
+        TrackingHelper.setTracking(bikeRide, geoLoc);
+
+        //Get leader tracking
+        bikeRide.rideLeaderTracking = TrackingHelper.getRideLeaderTracking(bikeRide);
+
+        //Get all current tracks
+        bikeRide.currentTrackings = TrackingHelper.getAllCurrentTrackings(bikeRide);
+
+        return bikeRide;
+    }
+
     @POST
-    @Path("new")
+    @Path("new/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
     @Consumes (MediaType.APPLICATION_JSON)
-    public Response newBikeRide(BikeRide bikeRide) {
+    public Response newBikeRide(BikeRide bikeRide, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
         Response response;
+        LOG.info("Received POST XML/JSON Request. New BikeRide request");
+
         try {
-            LOG.info("Received POST XML/JSON Request. New BikeRide request");
+            if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+                GeoLoc geoLoc = new GeoLoc();
+                geoLoc.latitude = latitude;
+                geoLoc.longitude = longitude;
 
-            //Validate real address:
-            if (GoogleGeocoderApiHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
-                    GoogleGeocoderApiHelper.setBikeRideLocationId(bikeRide)) {
+                //Validate real address:
+                if (GoogleGeocoderApiHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
+                        GoogleGeocoderApiHelper.setBikeRideLocationId(bikeRide)) {
 
-                bikeRide.imagePath = getImagePath(bikeRide.imagePath);
+                    bikeRide.imagePath = getImagePath(bikeRide.imagePath);
 
-                //save the object using Jongo
-                MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-                collectionBikeRides.save(bikeRide);
+                    //save the object using Jongo
+                    MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
+                    collectionBikeRides.save(bikeRide);
 
-                int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
-                updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
+                    int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
+                    updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
 
-                LOG.error("Not an error, but hey, we've got a new bikeride! id="+bikeRide.id);
-                response = Response.status(Response.Status.OK).entity(bikeRide).build();
+                    postBikeRideDBUpdates(bikeRide, geoLoc);
+
+                    response = Response.status(Response.Status.OK).entity(bikeRide).build();
+
+                } else {
+                    //Invalid address
+                    LOG.info("Invalid address, we're not making the ride sucker!");
+                    response = Response.status(Response.Status.CONFLICT).entity("Invalid Address").build();
+                }
 
             } else {
-                //Invalid address
-                LOG.info("Invalid address, we're not making the ride sucker!");
-                response = Response.status(Response.Status.CONFLICT).entity("Invalid Address").build();
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
             }
 
         } catch (Exception e) {
@@ -138,13 +154,20 @@ public class BikeRidesResource {
 	 * @return
 	 */
     @POST
-    @Path("update")
+    @Path("update/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
     @Consumes (MediaType.APPLICATION_JSON)
-    public Response updateBikeRide(Root root)  {
+    public Response updateBikeRide(Root root, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude)  {
         Response response;
 		try {
-			LOG.info("Received POST XML/JSON Request. Update BikeRide request");
-            response = changeBikeRide(root, SharedValues.UpdateType.UPDATE_TYPE);
+            if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+                GeoLoc geoLoc = new GeoLoc();
+                geoLoc.latitude = latitude;
+                geoLoc.longitude = longitude;
+			    LOG.info("Received POST XML/JSON Request. Update BikeRide request");
+                response = changeBikeRide(root, geoLoc, SharedValues.UpdateType.UPDATE_TYPE);
+            } else {
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
+            }
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
@@ -160,7 +183,7 @@ public class BikeRidesResource {
 		Response response;
 		try {
 			LOG.info("Received POST XML/JSON Request. Delete BikeRide request");
-            response = changeBikeRide(root, SharedValues.UpdateType.DELETE_TYPE);
+            response = changeBikeRide(root, null, SharedValues.UpdateType.DELETE_TYPE);
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
@@ -169,7 +192,7 @@ public class BikeRidesResource {
 		return response;
 	}
 
-    private Response changeBikeRide(Root root, SharedValues.UpdateType type) throws  Exception {
+    private Response changeBikeRide(Root root, GeoLoc geoLoc, SharedValues.UpdateType type) throws  Exception {
         Response response = null;
         String userId = "";
         boolean validUser = false;
@@ -227,6 +250,8 @@ public class BikeRidesResource {
 
                         //update the object
                         collectionBikeRides.save(updatedBikeRide);
+
+                        postBikeRideDBUpdates(updatedBikeRide, geoLoc);
 
                         response = Response.status(Response.Status.OK).entity(updatedBikeRide).build();
 
