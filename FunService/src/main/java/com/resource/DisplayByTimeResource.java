@@ -183,16 +183,6 @@ public class DisplayByTimeResource {
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 
-            //Set the closest Location (name that will print on screen) that will be printed in top left of screen.
-            String name = CommonAnonymousAndUserCalls.getAnonymousUserName(rideLeaderId);
-            if (name == "") {
-                name = CommonAnonymousAndUserCalls.getUserName(rideLeaderId);
-            }
-            Location closestLocation = new Location();
-            closestLocation.city = name + "'s Rides";
-            closestLocation.formattedAddress = closestLocation.city + ","; //Just to trick the UI to print this value.... bad code. fix this.
-            root.ClosestLocation = closestLocation;
-
 			//**(Set tracking on bike rides: 2 DB call)
 			TrackingHelper.setTracking(root.BikeRides, geoLoc);
             response = Response.status(Response.Status.OK).entity(root).build();
