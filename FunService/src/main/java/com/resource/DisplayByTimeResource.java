@@ -190,6 +190,7 @@ public class DisplayByTimeResource {
             }
             Location closestLocation = new Location();
             closestLocation.city = name + "'s Rides";
+            closestLocation.formattedAddress = closestLocation.city + ","; //Just to trick the UI to print this value.... bad code. fix this.
             root.ClosestLocation = closestLocation;
 
 			//**(Set tracking on bike rides: 2 DB call)
