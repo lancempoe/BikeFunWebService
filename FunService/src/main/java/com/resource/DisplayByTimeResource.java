@@ -8,6 +8,7 @@ import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
 import com.model.Root;
+import com.tools.CommonAnonymousAndUserCalls;
 import com.tools.CommonBikeRideCalls;
 import com.tools.GoogleGeocoderApiHelper;
 import com.tools.TrackingHelper;
@@ -181,6 +182,15 @@ public class DisplayByTimeResource {
 					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
+
+            //Set the closest Location (name that will print on screen) that will be printed in top left of screen.
+            String name = CommonAnonymousAndUserCalls.getAnonymousUserName(rideLeaderId);
+            if (name == "") {
+                name = CommonAnonymousAndUserCalls.getUserName(rideLeaderId);
+            }
+            Location closestLocation = new Location();
+            closestLocation.city = name + "'s Rides";
+            root.ClosestLocation = closestLocation;
 
 			//**(Set tracking on bike rides: 2 DB call)
 			TrackingHelper.setTracking(root.BikeRides, geoLoc);
