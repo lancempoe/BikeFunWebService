@@ -113,6 +113,8 @@ public class DisplayByProximityResource {
 					.as(BikeRide.class);
 			List<BikeRide> closeBikeRides = Lists.newArrayList(all);
 
+LOG.error(bikeRidesCollection.toString());
+
 			//Two calls to the DB
 			TrackingHelper.setTracking(closeBikeRides, geoLoc);
 
