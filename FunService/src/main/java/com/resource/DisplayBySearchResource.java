@@ -103,7 +103,10 @@ public class DisplayBySearchResource {
 				filterStartDateTime = new DateTime(query.date);
 				filterStartDateTime = filterStartDateTime.toDateMidnight().toDateTime();
 				filterEndDateTime = filterStartDateTime.plusDays(1);
-			}
+			} else {
+                filterStartDateTime = DateTime.now();
+                filterStartDateTime = filterStartDateTime.toDateMidnight().toDateTime();
+            }
 
             //Build the query
             String queryAsString = "{$and: [";
@@ -111,7 +114,8 @@ public class DisplayBySearchResource {
             if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [{ bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'}}, { details: {$regex: '.*"+query.query+".*', $options: 'i'}}]}, "; }
             if(StringUtils.isNotBlank(query.city)) { queryAsString += "{cityLocationId: { $all: [ " + locationQuery + " ]}}, "; }
             if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += "{targetAudience: '" + query.targetAudience+"'}, "; }
-            if(filterStartDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}}, "; }
+            if(filterStartDateTime != null && filterEndDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}}, "; }
+            else if(filterStartDateTime != null) { queryAsString += "{rideStartTime: {$gte: "+filterStartDateTime+"}}, "; }
             queryAsString = queryAsString.substring(0, queryAsString.length() - 2) + "]}";
 
 
