@@ -57,7 +57,7 @@ public class TrackingHelper {
 			//Because of the gte, it is possible that 1/1000 of the results will be duplicated.
 			//If changed to gt, then 1/1000 tracks may not be returned.  Depends on client speeds.
 			Iterable<Tracking> trackings = trackingCollection
-                    .find("{distinct: Tracking, key: trackingUserId, bikeRideId: #, trackingUserId: #, trackingTime: {$gte: #}}",
+                    .find("{distinct: \"Tracking\", key: \"trackingUserId\", bikeRideId: #, trackingUserId: #, trackingTime: {$gte: #}}",
 							bikeRide.id, 
 							bikeRide.rideLeaderId, 
 							clientHeartBeat)
