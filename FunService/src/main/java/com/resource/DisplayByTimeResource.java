@@ -179,7 +179,7 @@ public class DisplayByTimeResource {
 							rideLeaderId)
 					.sort("{rideStartTime : -1}")
 					.limit(200)
-					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.fields("{cityLocationId: 0, rideLeaderId: 0}") //TODO once we narrow down the UI we can cut down data further.
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 
