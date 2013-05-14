@@ -1,12 +1,11 @@
 package com.tools;
 
+import com.google.api.services.oauth2.model.Tokeninfo;
 import com.google.code.geocoder.Geocoder;
 import com.model.OAuth;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.google.api.services.oauth2.model.Tokeninfo;
-
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;

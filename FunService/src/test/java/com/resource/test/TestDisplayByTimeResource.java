@@ -1,18 +1,28 @@
 //package com.resource.test;
 //
+//import com.db.MongoDatabase;
+//import com.google.common.collect.Lists;
 //import com.model.BikeRide;
+//import com.model.GeoLoc;
 //import com.model.Location;
 //import com.model.Root;
+//import com.settings.SharedStaticValues;
 //import com.sun.jersey.api.client.Client;
 //import com.sun.jersey.api.client.ClientResponse;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
+//import com.tools.CommonBikeRideCalls;
 //import com.tools.GoogleGeocoderApiHelper;
 //import junit.framework.TestCase;
+//import org.joda.time.DateTime;
+//import org.joda.time.DateTimeZone;
 //import org.jongo.MongoCollection;
 //import org.junit.Test;
+//
+//import javax.ws.rs.core.Response;
+//import java.util.ArrayList;
 //
 ///**
 //* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
@@ -52,60 +62,75 @@
 //		location.city = ("Portland");
 //		location.state = ("OR");
 //		GoogleGeocoderApiHelper.setGeoLocation(location);
+//        GeoLoc geoLoc = location.geoLoc;
 //
-//        ClientResponse response = webResource
-//				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.get(ClientResponse.class);
+//        MongoDatabase.ConnectToDb();
 //
-//        final int statusCode = response.getStatus();
-//        if ((statusCode < 200) || (statusCode >= 300)) {
-//            String message = "What?!?!";
+//        try {
+//            Root root = new Root();
+//
+//            DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
+//            Long yesterday = todayDateTime.minusDays(1).getMillis();  //
+//            MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
+//
+//            Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
+//            root.ClosestLocation = closestLocation;
+//            root.BikeRides = new ArrayList<BikeRide>();
+//
+//            if(closestLocation==null) {
+//                root.ClosestLocation = new Location();
+//                root.ClosestLocation.geoLoc = new GeoLoc();
+//                Iterable<BikeRide> bikeRides = getRidesFromDB(yesterday, bikeCollection);
+//
+//                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
+//            } else {
+//                //**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
+//                //Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
+//                Iterable<BikeRide> bikeRides = getRidesFromDB(root.ClosestLocation.id, yesterday, bikeCollection);
+//                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
+//            }
+//
+//            //**(Set tracking on bike rides: 2 DB call)
+//            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
+//            String test = "";
 //        }
-//        Root root = response.getEntity(Root.class);
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
 //
-//		assertTrue(root.BikeRides.size() == 8); //1 is in salem and one is more than 1 day old
-//		assertTrue(root.ClosestLocation.city.equals("Portland"));
+////        ClientResponse response = webResource
+////				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
+////				.type("application/json")
+////				.get(ClientResponse.class);
+////
+////        final int statusCode = response.getStatus();
+////        if ((statusCode < 200) || (statusCode >= 300)) {
+////            String message = "What?!?!";
+////        }
+////        Root root = response.getEntity(Root.class);
 //
-//		location = new Location();
-//		location.streetAddress = ("1224 2nd Street Northwest");
-//		location.city = ("SALEM");
-//		location.state = ("OR");
-//		GoogleGeocoderApiHelper.setGeoLocation(location);
-//
-//		root = webResource
-//				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.get(Root.class);
-//
-//		assertTrue(root.BikeRides.size() == 4);
-//		assertTrue(root.ClosestLocation.city.equals("Salem"));
-//
-//		location = new Location();
-//		location.streetAddress = ("SE Ash & SE 22nd");
-//		location.city = ("Portland");
-//		location.state = ("OR");
-//		GoogleGeocoderApiHelper.setGeoLocation(location);
-//
-//		root = webResource
-//				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.get(Root.class);
-//
-//		assertTrue(root.BikeRides.size() == 8);
-//		assertTrue(root.ClosestLocation.city.equals("Portland"));
-//
-//		boolean validPath = true;
-//		try {
-//			root = webResource
-//					.path("display/by_time_of_day/geoloc=765x43456,345.676543")
-//					.type("application/json")
-//					.get(Root.class);
-//		} catch (Exception e) {
-//			validPath = false;
-//		}
-//
-//		assertFalse(validPath);
 //	}
+//
+//    private Iterable<BikeRide> getRidesFromDB(Long yesterday, MongoCollection bikeCollection) {
+//        return bikeCollection
+//                .find("{rideStartTime: {$gt: #}}",
+//                        yesterday)
+//                .sort("{rideStartTime : 1}")
+//                .limit(200)
+//                .fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
+//                .as(BikeRide.class);
+//    }
+//
+//    private Iterable<BikeRide> getRidesFromDB(String closetsLocationId, Long yesterday, MongoCollection bikeCollection) {
+//        return bikeCollection
+//                .find("{rideStartTime: {$gt: #}, cityLocationId: #}",
+//                        yesterday,
+//                        closetsLocationId)
+//                .sort("{rideStartTime : 1}")
+//                .limit(200)
+//                .fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
+//                .as(BikeRide.class);
+//    }
 //
 //}

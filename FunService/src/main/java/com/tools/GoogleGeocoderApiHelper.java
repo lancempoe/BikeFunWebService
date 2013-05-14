@@ -7,6 +7,7 @@ import com.google.code.geocoder.GeocoderRequestBuilder;
 import com.google.code.geocoder.model.GeocodeResponse;
 import com.google.code.geocoder.model.GeocoderRequest;
 import com.google.code.geocoder.model.GeocoderStatus;
+import com.google.common.collect.Lists;
 import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
@@ -16,6 +17,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jongo.MongoCollection;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -103,22 +106,35 @@ public class GoogleGeocoderApiHelper {
 
     public static boolean setBikeRideLocationId(BikeRide bikeRide) {
 		try {
+            Location location = new Location();
+            List<Location> locations = new ArrayList<Location>();
+
+            //Build location
+            StringBuilder addressAsBuilder = new StringBuilder();
+            addressAsBuilder.append(bikeRide.location.city).append(", ").append(bikeRide.location.state);
+            if (StringUtils.isNotBlank(bikeRide.location.country)) {
+                addressAsBuilder.append(", ").append(bikeRide.location.country);
+            }
+
 			//Check is current city exist
 			MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
-			Location location = locationCollection
-					.findOne("{city:#, state:#, country:#}", 
-							bikeRide.location.city, bikeRide.location.state, bikeRide.location.country)
-							.as(Location.class);
-			if (location == null) {
+            Iterable<Location> locationsIterable = locationCollection
+                    .find("{formattedAddress: {$regex: '"+addressAsBuilder.toString()+".*', $options: 'i'} }")
+                    .limit(1)
+                    .as(Location.class);
+            locations = Lists.newArrayList(locationsIterable);
+
+			if (locations == null || locations.size() == 0) {
 				//Add new location to the DB
-				location = new Location();
 				location.city = (bikeRide.location.city);
 				location.state = (bikeRide.location.state);
 				location.country = (bikeRide.location.country);
 				GoogleGeocoderApiHelper.setGeoLocation(location); //Call API for city center geoCode
 				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 				collection.save(location);
-			}
+			} else {
+                location = locations.get(0);
+            }
 			bikeRide.cityLocationId = location.id;
 			return true;
 		} catch (Exception e) {

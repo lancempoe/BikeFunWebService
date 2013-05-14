@@ -5,9 +5,7 @@ import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
-import com.settings.SharedStaticValues;
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
 import org.jongo.MongoCollection;
 
 import java.util.ArrayList;

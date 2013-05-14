@@ -95,36 +95,45 @@ public class BikeRidesResource {
         LOG.info("Received POST XML/JSON Request. New BikeRide request");
 
         try {
-            if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
-                GeoLoc geoLoc = new GeoLoc();
-                geoLoc.latitude = latitude;
-                geoLoc.longitude = longitude;
+            if (bikeRide != null &&
+                    StringUtils.isNotBlank(bikeRide.bikeRideName) &&
+                    StringUtils.isNotBlank(bikeRide.rideLeaderId) &&
+                    bikeRide.rideStartTime != null &&
+                    StringUtils.isNotBlank(bikeRide.details)) {
 
-                //Validate real address:
-                if (GoogleGeocoderApiHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
-                        GoogleGeocoderApiHelper.setBikeRideLocationId(bikeRide)) {
+                if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
+                    GeoLoc geoLoc = new GeoLoc();
+                    geoLoc.latitude = latitude;
+                    geoLoc.longitude = longitude;
 
-                    bikeRide.imagePath = getImagePath(bikeRide.imagePath);
+                    //Validate real address:
+                    if (GoogleGeocoderApiHelper.setGeoLocation(bikeRide.location) && //Call API for ride geoCodes
+                            GoogleGeocoderApiHelper.setBikeRideLocationId(bikeRide)) {
 
-                    //save the object using Jongo
-                    MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
-                    collectionBikeRides.save(bikeRide);
+                        bikeRide.imagePath = getImagePath(bikeRide.imagePath);
 
-                    int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
-                    updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
+                        //save the object using Jongo
+                        MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
+                        collectionBikeRides.save(bikeRide);
 
-                    bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
+                        int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
+                        updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
 
-                    response = Response.status(Response.Status.OK).entity(bikeRide).build();
+                        bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
+
+                        response = Response.status(Response.Status.OK).entity(bikeRide).build();
+
+                    } else {
+                        //Invalid address
+                        LOG.info("Invalid address, we're not making the ride sucker!");
+                        response = Response.status(Response.Status.CONFLICT).entity("Invalid Address").build();
+                    }
 
                 } else {
-                    //Invalid address
-                    LOG.info("Invalid address, we're not making the ride sucker!");
-                    response = Response.status(Response.Status.CONFLICT).entity("Invalid Address").build();
+                    response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
                 }
-
             } else {
-                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Please complete all fields.").build();
             }
 
         } catch (Exception e) {

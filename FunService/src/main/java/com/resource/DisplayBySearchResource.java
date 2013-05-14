@@ -44,7 +44,7 @@ public class DisplayBySearchResource {
                      StringUtils.isBlank(query.targetAudience) &&
                      StringUtils.isBlank(query.city) &&
                      StringUtils.isBlank(query.rideLeaderId))) {
-                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Query Values.  No Values Passed").build();
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Please make a selection.").build();
             } else {
                 GeoLoc geoLoc = new GeoLoc();
                 geoLoc.latitude = latitude;
@@ -99,25 +99,27 @@ public class DisplayBySearchResource {
 			
 			DateTime filterStartDateTime = null;
 			DateTime filterEndDateTime = null;
+            Long filterStartDateAsMilliSeconds = null;
+            Long filterEndDateAsMilliSeconds = null;
 			if (query.date != null) {
 				filterStartDateTime = new DateTime(query.date);
 				filterStartDateTime = filterStartDateTime.toDateMidnight().toDateTime();
-				filterEndDateTime = filterStartDateTime.plusDays(1);
+				filterStartDateAsMilliSeconds = filterStartDateTime.toInstant().getMillis();
+                filterEndDateAsMilliSeconds = filterStartDateTime.plusDays(1).toInstant().getMillis();
 			} else {
                 filterStartDateTime = DateTime.now();
-                filterStartDateTime = filterStartDateTime.toDateMidnight().toDateTime();
+                filterStartDateAsMilliSeconds = filterStartDateTime.toInstant().getMillis();
             }
 
             //Build the query
-            String queryAsString = "{$and: [";
+            String queryAsString = "{$and: [ ";
             if(StringUtils.isNotBlank(query.rideLeaderId)) { queryAsString += "{rideLeaderId: '" + query.rideLeaderId+"'}, "; }
-            if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [{ bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'}}, { details: {$regex: '.*"+query.query+".*', $options: 'i'}}]}, "; }
-            if(StringUtils.isNotBlank(query.city)) { queryAsString += "{cityLocationId: { $all: [ " + locationQuery + " ]}}, "; }
+            if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [ { bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'} }, {details: {$regex: '.*"+query.query+".*', $options: 'i'} } ] }, "; }
+            if(StringUtils.isNotBlank(query.city)) { queryAsString += "{cityLocationId: {$all: [ " + locationQuery + " ] } }, "; }
             if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += "{targetAudience: '" + query.targetAudience+"'}, "; }
-            if(filterStartDateTime != null && filterEndDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}}, "; }
-            else if(filterStartDateTime != null) { queryAsString += "{rideStartTime: {$gte: "+filterStartDateTime+"}}, "; }
-            queryAsString = queryAsString.substring(0, queryAsString.length() - 2) + "]}";
-
+            if (filterEndDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateAsMilliSeconds+", $gte: "+filterStartDateAsMilliSeconds+"} }, "; }
+            else { queryAsString += "{rideStartTime: {$gte: "+filterStartDateAsMilliSeconds+"} }, "; }
+            queryAsString = queryAsString.substring(0, queryAsString.length() - 2) + " ] }";
 
 			Iterable<BikeRide> bikeRides = bikeCollection
 					.find(queryAsString)

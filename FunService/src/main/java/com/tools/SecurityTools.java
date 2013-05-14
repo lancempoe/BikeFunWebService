@@ -2,7 +2,9 @@ package com.tools;
 
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
-import com.model.*;
+import com.model.AnonymousUser;
+import com.model.DeviceAccount;
+import com.model.User;
 import com.settings.ForeignIdType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;

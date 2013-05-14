@@ -2,7 +2,6 @@ package com.tools;
 
 import com.db.MongoDatabase;
 import com.model.AnonymousUser;
-import com.model.DeviceAccount;
 import com.model.User;
 import org.bson.types.ObjectId;
 import org.jongo.MongoCollection;

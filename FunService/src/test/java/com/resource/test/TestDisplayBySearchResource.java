@@ -7,6 +7,7 @@
 //import com.db.MongoDatabase;
 //import com.google.common.collect.Lists;
 //import com.model.*;
+//import com.settings.SharedStaticValues;
 //import com.tools.CommonBikeRideCalls;
 //import com.tools.GoogleGeocoderApiHelper;
 //import com.tools.TrackingHelper;
@@ -70,136 +71,129 @@
 //		location.city = ("Portland");
 //		location.state = ("OR");
 //		GoogleGeocoderApiHelper.setGeoLocation(location);
-//
+//        GeoLoc geoLoc = location.geoLoc;
 //
 //        Query query = new Query();
-//        query.query = "tacos";
-//        query.city = "Portland";
-//        query.targetAudience = "Boozy";
+//        query.query = "";
+//        query.city = "portland";
+//        query.targetAudience = "";
 //
 ////        Root root  = webResource
 ////                .path("display/by_search/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
 ////                .type("application/json")
 ////                .post(Root.class, query);
 //
-//
-//         ////////////
-//
-//        GeoLoc geoLoc = new GeoLoc();
-//        geoLoc.latitude = location.geoLoc.latitude;
-//        geoLoc.longitude = location.geoLoc.longitude;
-//
-//        Root root = new Root();
-//
 //        MongoDatabase.ConnectToDb();
-//        MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
 //
-//        List<Location> locations = new ArrayList<Location>();
-//        String locationQuery = "";
-//        if (StringUtils.isEmpty(query.city)) {
-//            DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
-//            Long yesterday = todayDateTime.minusDays(1).getMillis();
-//            Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
-//            root.ClosestLocation = closestLocation;
-//            locations.add(closestLocation);
-//        } else {
-//            MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.LOCATIONS);
+//        try
+//        {
+//            Root root = new Root();
 //
-//            ///Find all matching locations
-//            Iterable<Location> locationsIterable = locationCollection
-//                    .find("{ city: {$regex: '.*"+query.city +".*', $options: 'i'}}")
-//                    .limit(200)
+//            BikeRide bikeRide = new BikeRide();
+//            Location location1 = new Location();
+//            location1.city = "PortlAND";
+//            location1.state = "Or";
+//            bikeRide.location = location1;
+//
+//            Location LOCALlocation = new Location();
+//            List<Location> LOCALlocations = new ArrayList<Location>();
+//
+//            StringBuilder stringBuilder = new StringBuilder();
+//            stringBuilder.append(bikeRide.location.city).append(", ").append(bikeRide.location.state);
+//            if (StringUtils.isNotBlank(bikeRide.location.country)) {
+//                stringBuilder.append(", ").append(bikeRide);
+//            }
+//
+//            //Check is current city exist
+//            MongoCollection locallocationCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.LOCATIONS);
+//            Iterable<Location> locallocationsIterable = locallocationCollection
+//                    .find("{formattedAddress: {$regex: '"+ stringBuilder.toString()+".*', $options: 'i'} }")
+//                    .limit(1)
 //                    .as(Location.class);
-//            locations = Lists.newArrayList(locationsIterable);
+//            LOCALlocations = Lists.newArrayList(locallocationsIterable);
+//
+//            if (LOCALlocations == null || LOCALlocations.size() == 0) {
+//                //Add new location to the DB
+//                String shit = "";
+//            } else {
+//                LOCALlocation = LOCALlocations.get(0);
+//            }
+//            bikeRide.cityLocationId = LOCALlocation.id;
+//
+//            MongoDatabase.mongoClient.close();
+//
+//
+//
+//            MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
+//
+//            List<Location> locations = new ArrayList<Location>();
+//            String locationQuery = "";
+//            if (StringUtils.isEmpty(query.city)) {
+//                DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
+//                Long yesterday = todayDateTime.minusDays(1).getMillis();
+//                Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
+//                root.ClosestLocation = closestLocation;
+//                locations.add(closestLocation);
+//            } else {
+//                MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.LOCATIONS);
+//
+//                ///Find all matching locations
+//                Iterable<Location> locationsIterable = locationCollection
+//                        .find("{ city: {$regex: '.*"+query.city +".*', $options: 'i'}}")
+//                        .limit(200)
+//                        .as(Location.class);
+//                locations = Lists.newArrayList(locationsIterable);
+//            }
+//            for (Location myLocation : locations) {
+//                locationQuery += ", \"" + myLocation.id + "\"";
+//            }
+//            locationQuery = locationQuery.substring(2);
+//
+//            DateTime filterStartDateTime = null;
+//            DateTime filterEndDateTime = null;
+//            Long filterStartDateAsMilliSeconds = null;
+//            Long filterEndDateAsMilliSeconds = null;
+//            if (query.date != null) {
+//                filterStartDateTime = new DateTime(query.date);
+//                filterStartDateTime = filterStartDateTime.toDateMidnight().toDateTime();
+//                filterStartDateAsMilliSeconds = filterStartDateTime.toInstant().getMillis();
+//                filterEndDateAsMilliSeconds = filterStartDateTime.plusDays(1).toInstant().getMillis();
+//            } else {
+//                filterStartDateTime = DateTime.now();
+//                filterStartDateAsMilliSeconds = filterStartDateTime.toInstant().getMillis();
+//            }
+//
+//            //Build the query
+//            String queryAsString = "{$and: [ ";
+//            if(StringUtils.isNotBlank(query.rideLeaderId)) { queryAsString += "{rideLeaderId: '" + query.rideLeaderId+"'}, "; }
+//            if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [ { bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'} }, {details: {$regex: '.*"+query.query+".*', $options: 'i'} } ] }, "; }
+//            if(StringUtils.isNotBlank(query.city)) { queryAsString += "{cityLocationId: {$all: [ " + locationQuery + " ] } }, "; }
+//            if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += "{targetAudience: '" + query.targetAudience+"'}, "; }
+//            if (filterEndDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateAsMilliSeconds+", $gte: "+filterStartDateAsMilliSeconds+"} }, "; }
+//            else { queryAsString += "{rideStartTime: {$gte: "+filterStartDateAsMilliSeconds+"} }, "; }
+//            queryAsString = queryAsString.substring(0, queryAsString.length() - 2) + " ] }";
+//
+//            Iterable<BikeRide> bikeRides = bikeCollection
+//                    .find(queryAsString)
+//                    .sort("{rideStartTime : 1}")
+//                    .limit(200)
+//                    .fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
+//                    .as(BikeRide.class);
+//            root.BikeRides = Lists.newArrayList(bikeRides);
+//
+//            //**(Set tracking on bike rides: 2 DB call)
+//            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
 //        }
-//        for (Location location1 : locations) {
-//            locationQuery += ", \"" + location1.id + "\"";
-//        }
-//        locationQuery = locationQuery.substring(2);
-//
-//        DateTime filterStartDateTime = null;
-//        DateTime filterEndDateTime = null;
-//        if (query.date != null) {
-//            filterStartDateTime = new DateTime(query.date);
-//            filterStartDateTime = filterStartDateTime.toDateMidnight().toDateTime();
-//            filterEndDateTime = filterStartDateTime.plusDays(1);
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
 //        }
 //
-//        //Build the query
-//        String queryAsString = "{$and: [";
-//        if(StringUtils.isNotBlank(query.rideLeaderId)) { queryAsString += "{rideLeaderId: '" + query.rideLeaderId+"'}, "; }
-//        if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [{ bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'}}, { details: {$regex: '.*"+query.query+".*', $options: 'i'}}]}, "; }
-//        if(StringUtils.isNotBlank(query.city)) { queryAsString += "{cityLocationId: { $all: [ " + locationQuery + " ]}}, "; }
-//        if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += "{targetAudience: '" + query.targetAudience+"'}, "; }
-//        if(filterStartDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateTime+", $gte: "+filterStartDateTime+"}}, "; }
-//        queryAsString = queryAsString.substring(0, queryAsString.length() - 2) + "]}";
 //
-//        Iterable<BikeRide> bikeRides = bikeCollection
-//                .find(queryAsString)
-//                .sort("{rideStartTime : 1}")
-//                .limit(200)
-//                .fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
-//                .as(BikeRide.class);
-//        root.BikeRides = Lists.newArrayList(bikeRides);
 //
-//        //**(Set tracking on bike rides: 2 DB call)
-//        TrackingHelper.setTracking(root.BikeRides, geoLoc);
+//
+//
 //        MongoDatabase.mongoClient.close();
-//
-//        /////////////
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//        assertTrue(root.BikeRides.size() == 1); //1 in portland, 1 in salem (should not include)
-//
-//		query = new Query();
-//		query.query = "tacos";
-//
-//		root  = webResource
-//				.path("display/by_search/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.post(Root.class, query);
-//
-//		assertTrue(root.BikeRides.size() == 1); //1 in portland, 1 in salem (should not include)
-//		assertTrue(root.ClosestLocation.city.equals("Portland"));
-//
-//		query = new Query();
-//		query.query = "apple";
-//
-//		root  = webResource
-//				.path("display/by_search/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.post(Root.class, query);
-//
-//		assertTrue(root.BikeRides.size() == 2); //1 in name, 2 in details (1 of which is in salem).
-//		assertTrue(root.ClosestLocation.city.equals("Portland"));
-//
-//		query = new Query();
-//		query.targetAudience = "21+";
-//
-//		root  = webResource
-//				.path("display/by_search/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.post(Root.class, query);
-//
-//		assertTrue(root.BikeRides.size() == 1); //1 under 2 over (1 in salem);
-//		assertTrue(root.ClosestLocation.city.equals("Portland"));
 //
 //	}
 //}
