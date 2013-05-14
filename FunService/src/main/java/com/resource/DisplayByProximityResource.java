@@ -7,8 +7,9 @@ import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
 import com.model.Root;
+import com.settings.SharedStaticValues;
+import com.tools.CommonBikeRideCalls;
 import com.tools.GoogleGeocoderApiHelper;
-import com.tools.TrackingHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -109,14 +110,12 @@ public class DisplayByProximityResource {
 							RADIUS_IN_MILES/ONE_DEGREE_IN_MILES,
 							max ,
 							min )
-					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
 					.as(BikeRide.class);
 			List<BikeRide> closeBikeRides = Lists.newArrayList(all);
 
-LOG.error(bikeRidesCollection.toString());
-
-			//Two calls to the DB
-			TrackingHelper.setTracking(closeBikeRides, geoLoc);
+            //**(Set tracking on bike rides: 2 DB call)
+            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
 
 			for(BikeRide closeBikeRide : closeBikeRides) {
 				//Find all rides that haven't started AND find all bike rides still being tracked.

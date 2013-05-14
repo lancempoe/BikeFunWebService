@@ -6,7 +6,7 @@ import com.model.AnonymousUser;
 import com.model.DeviceAccount;
 import com.model.OAuth;
 import com.model.User;
-import com.settings.SharedValues;
+import com.settings.SharedStaticValues;
 import com.tools.ImageHelper;
 import com.tools.SecurityTools;
 import org.apache.commons.lang.StringUtils;
@@ -163,7 +163,7 @@ public class UsersResource {
         Response response;
         try {
             LOG.info("Received POST XML/JSON update Request. User request");
-            response = changeUser(user, SharedValues.UpdateType.UPDATE_TYPE);
+            response = changeUser(user, SharedStaticValues.UpdateType.UPDATE_TYPE);
         } catch (Exception e) {
             LOG.error(e);
             e.printStackTrace();
@@ -172,7 +172,7 @@ public class UsersResource {
         return response;
     }
 
-    private Response changeUser(User submittedUser, SharedValues.UpdateType type) {
+    private Response changeUser(User submittedUser, SharedStaticValues.UpdateType type) {
         Response response = null;
 
         try {

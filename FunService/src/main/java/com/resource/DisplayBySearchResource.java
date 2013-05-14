@@ -4,9 +4,9 @@ import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.google.common.collect.Lists;
 import com.model.*;
+import com.settings.SharedStaticValues;
 import com.tools.CommonBikeRideCalls;
 import com.tools.GoogleGeocoderApiHelper;
-import com.tools.TrackingHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -123,12 +123,12 @@ public class DisplayBySearchResource {
 					.find(queryAsString)
 					.sort("{rideStartTime : 1}")
 					.limit(200)
-					.fields("{cityLocationId: 0, rideLeaderId: 0, details: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 
 			//**(Set tracking on bike rides: 2 DB call)
-			TrackingHelper.setTracking(root.BikeRides, geoLoc);
+            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
             response = Response.status(Response.Status.OK).entity(root).build();
 		}
 		catch (Exception e)
@@ -140,5 +140,4 @@ public class DisplayBySearchResource {
 
 		return response;
 	}
-
 }

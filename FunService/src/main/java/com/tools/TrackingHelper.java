@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Tracking;
-import com.settings.SharedValues;
+import com.settings.SharedStaticValues;
 import org.joda.time.DateTime;
 import org.jongo.MongoCollection;
 
@@ -25,7 +25,7 @@ public class TrackingHelper {
 		if (bikeRide.trackingAllowed) {
 			
 			DateTime now = new DateTime(); // Joda time
-			Long clientHeartBeat = now.minusMinutes(SharedValues.CLIENT_HEART_BEAT_IN_MINUTES).getMillis();
+			Long clientHeartBeat = now.minusMinutes(SharedStaticValues.CLIENT_HEART_BEAT_IN_MINUTES).getMillis();
 
 			MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 
@@ -50,7 +50,7 @@ public class TrackingHelper {
 		if (bikeRide.trackingAllowed) {
 			
 			DateTime now = new DateTime(); // Joda time
-			Long clientHeartBeat = now.minusMinutes(SharedValues.CLIENT_HEART_BEAT_IN_MINUTES).getMillis();
+			Long clientHeartBeat = now.minusMinutes(SharedStaticValues.CLIENT_HEART_BEAT_IN_MINUTES).getMillis();
 
 			MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 
@@ -70,25 +70,6 @@ public class TrackingHelper {
 		}
 		return bikeRidetrackings;
 	}
-	
-	/**
-	 * Find and set:
-	 * 1) the distance between the client and the ride. 
-	 * 2) Most recent Tracking (if turned on)
-	 * 3) People that are tracking Count (if turned on)
-	 * @author lancepoehler
-	 * @throws Exception 
-	 */
-	public static void setTracking(List<BikeRide> bikeRides, GeoLoc geoLoc) throws Exception {
-
-		DateTime now = new DateTime(); // Joda time
-		Long clientHeartBeat = now.minusMinutes(SharedValues.CLIENT_HEART_BEAT_IN_MINUTES).getMillis();
-
-		MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
-		for(BikeRide bikeRide : bikeRides) {
-			setBikeRideTrackingDetails(bikeRide, geoLoc, trackingCollection, clientHeartBeat);
-		}
-	}
 
 	/**
 	 * Find and set:
@@ -101,7 +82,7 @@ public class TrackingHelper {
 	public static void setTracking(BikeRide bikeRide, GeoLoc geoLoc) throws Exception {
 
 		DateTime now = new DateTime(); // Joda time
-		Long clientHeartBeat = now.minusMinutes(SharedValues.CLIENT_HEART_BEAT_IN_MINUTES).getMillis();
+		Long clientHeartBeat = now.minusMinutes(SharedStaticValues.CLIENT_HEART_BEAT_IN_MINUTES).getMillis();
 
 		MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 		setBikeRideTrackingDetails(bikeRide, geoLoc, trackingCollection, clientHeartBeat);

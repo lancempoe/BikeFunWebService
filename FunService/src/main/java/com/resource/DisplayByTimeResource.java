@@ -8,10 +8,9 @@ import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
 import com.model.Root;
-import com.tools.CommonAnonymousAndUserCalls;
+import com.settings.SharedStaticValues;
 import com.tools.CommonBikeRideCalls;
 import com.tools.GoogleGeocoderApiHelper;
-import com.tools.TrackingHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -125,7 +124,7 @@ public class DisplayByTimeResource {
             }
 
 			//**(Set tracking on bike rides: 2 DB call)
-			TrackingHelper.setTracking(root.BikeRides, geoLoc);
+			root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
             response = Response.status(Response.Status.OK).entity(root).build();
 		}
 		catch (Exception e)
@@ -140,13 +139,13 @@ public class DisplayByTimeResource {
 
     private Iterable<BikeRide> getRidesFromDB(String closetsLocationId, Long yesterday, MongoCollection bikeCollection) {
         return bikeCollection
-                            .find("{rideStartTime: {$gt: #}, cityLocationId: #}",
-                                    yesterday,
-                                    closetsLocationId)
-                            .sort("{rideStartTime : 1}")
-                            .limit(200)
-                            .fields("{cityLocationId: 0, rideLeaderId: 0}") //TODO once we narrow down the UI we can cut down data further.
-                            .as(BikeRide.class);
+                .find("{rideStartTime: {$gt: #}, cityLocationId: #}",
+                        yesterday,
+                        closetsLocationId)
+                .sort("{rideStartTime : 1}")
+                .limit(200)
+                .fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
+                .as(BikeRide.class);
     }
 
     private Iterable<BikeRide> getRidesFromDB(Long yesterday, MongoCollection bikeCollection) {
@@ -155,7 +154,7 @@ public class DisplayByTimeResource {
                         yesterday)
                 .sort("{rideStartTime : 1}")
                 .limit(200)
-                .fields("{cityLocationId: 0, rideLeaderId: 0}") //TODO once we narrow down the UI we can cut down data further.
+                .fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
                 .as(BikeRide.class);
     }
 
@@ -179,12 +178,12 @@ public class DisplayByTimeResource {
 							rideLeaderId)
 					.sort("{rideStartTime : -1}")
 					.limit(200)
-					.fields("{cityLocationId: 0, rideLeaderId: 0}") //TODO once we narrow down the UI we can cut down data further.
+					.fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
 					.as(BikeRide.class);
 			root.BikeRides = Lists.newArrayList(bikeRides);
 
-			//**(Set tracking on bike rides: 2 DB call)
-			TrackingHelper.setTracking(root.BikeRides, geoLoc);
+            //**(Set tracking on bike rides: 2 DB call)
+            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
             response = Response.status(Response.Status.OK).entity(root).build();
 		}
 		catch (Exception e)

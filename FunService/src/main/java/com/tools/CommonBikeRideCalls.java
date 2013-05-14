@@ -2,12 +2,16 @@ package com.tools;
 
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
+import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
+import com.settings.SharedStaticValues;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.jongo.MongoCollection;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Shared classes for bike ride calls.
@@ -47,4 +51,26 @@ public class CommonBikeRideCalls {
 						.as(Location.class);
 		return closestLocation;
 	}
+
+    public static BikeRide postBikeRideDBUpdates(BikeRide bikeRide, GeoLoc geoLoc) throws Exception {
+
+        //Get the distance from the client, if the ride is
+        //currently tracking, and total people that have at one time tracked this ride.
+        TrackingHelper.setTracking(bikeRide, geoLoc);
+
+        //Get leader tracking
+        bikeRide.rideLeaderTracking = TrackingHelper.getRideLeaderTracking(bikeRide);
+
+        //Get all current tracks
+        bikeRide.currentTrackings = TrackingHelper.getAllCurrentTrackings(bikeRide);
+
+        return bikeRide;
+    }
+
+    public static List<BikeRide> postBikeRideDBUpdates(List<BikeRide> bikeRides, GeoLoc geoLoc) throws Exception {
+        for (BikeRide bikeRide : bikeRides) {
+            bikeRide = postBikeRideDBUpdates(bikeRide, geoLoc);
+        }
+        return bikeRides;
+    }
 }

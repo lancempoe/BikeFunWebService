@@ -3,11 +3,11 @@ package com.resource;
 import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.*;
-import com.settings.SharedValues;
+import com.settings.SharedStaticValues;
+import com.tools.CommonBikeRideCalls;
 import com.tools.GoogleGeocoderApiHelper;
 import com.tools.ImageHelper;
 import com.tools.SecurityTools;
-import com.tools.TrackingHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,7 +72,7 @@ public class BikeRidesResource {
 
 			//build tracking items.
 			if (bikeRide != null) {
-				bikeRide = postBikeRideDBUpdates(bikeRide, geoLoc);
+				bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
                 response = Response.status(Response.Status.OK).entity(bikeRide).build();
 			}
 		}
@@ -85,20 +85,7 @@ public class BikeRidesResource {
 		return response;
 	}
 
-    private BikeRide postBikeRideDBUpdates(BikeRide bikeRide, GeoLoc geoLoc) throws Exception {
 
-        //Get the distance from the client, if the ride is
-        //currently tracking, and total people that have at one time tracked this ride.
-        TrackingHelper.setTracking(bikeRide, geoLoc);
-
-        //Get leader tracking
-        bikeRide.rideLeaderTracking = TrackingHelper.getRideLeaderTracking(bikeRide);
-
-        //Get all current tracks
-        bikeRide.currentTrackings = TrackingHelper.getAllCurrentTrackings(bikeRide);
-
-        return bikeRide;
-    }
 
     @POST
     @Path("new/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
@@ -126,7 +113,7 @@ public class BikeRidesResource {
                     int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
                     updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
 
-                    postBikeRideDBUpdates(bikeRide, geoLoc);
+                    bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
 
                     response = Response.status(Response.Status.OK).entity(bikeRide).build();
 
@@ -164,7 +151,7 @@ public class BikeRidesResource {
                 geoLoc.latitude = latitude;
                 geoLoc.longitude = longitude;
 			    LOG.info("Received POST XML/JSON Request. Update BikeRide request");
-                response = changeBikeRide(root, geoLoc, SharedValues.UpdateType.UPDATE_TYPE);
+                response = changeBikeRide(root, geoLoc, SharedStaticValues.UpdateType.UPDATE_TYPE);
             } else {
                 response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
             }
@@ -183,7 +170,7 @@ public class BikeRidesResource {
 		Response response;
 		try {
 			LOG.info("Received POST XML/JSON Request. Delete BikeRide request");
-            response = changeBikeRide(root, null, SharedValues.UpdateType.DELETE_TYPE);
+            response = changeBikeRide(root, null, SharedStaticValues.UpdateType.DELETE_TYPE);
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
@@ -192,7 +179,7 @@ public class BikeRidesResource {
 		return response;
 	}
 
-    private Response changeBikeRide(Root root, GeoLoc geoLoc, SharedValues.UpdateType type) throws  Exception {
+    private Response changeBikeRide(Root root, GeoLoc geoLoc, SharedStaticValues.UpdateType type) throws  Exception {
         Response response = null;
         String userId = "";
         boolean validUser = false;
@@ -251,7 +238,7 @@ public class BikeRidesResource {
                         //update the object
                         collectionBikeRides.save(updatedBikeRide);
 
-                        postBikeRideDBUpdates(updatedBikeRide, geoLoc);
+                        updatedBikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(updatedBikeRide, geoLoc);
 
                         response = Response.status(Response.Status.OK).entity(updatedBikeRide).build();
 
@@ -308,17 +295,17 @@ public class BikeRidesResource {
         }
     }
 
-    private void updateLatestActiveTimeStamp(String rideLeaderId) {
+    private void updateLatestActiveTimeStamp(String userId) {
         try {
             //Update User that created the ride.
             MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
-            AnonymousUser rideLeaderAsAnonymousUser = auCollection.findOne(new ObjectId(rideLeaderId)).as(AnonymousUser.class);
+            AnonymousUser rideLeaderAsAnonymousUser = auCollection.findOne(new ObjectId(userId)).as(AnonymousUser.class);
             if (rideLeaderAsAnonymousUser != null) {
                 rideLeaderAsAnonymousUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
                 auCollection.save(rideLeaderAsAnonymousUser);
             } else {
                 MongoCollection userCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.USERS);
-                User rideLeaderAsUser = userCollection.findOne(new ObjectId(rideLeaderId)).as(User.class);
+                User rideLeaderAsUser = userCollection.findOne(new ObjectId(userId)).as(User.class);
                 rideLeaderAsUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
                 userCollection.save(rideLeaderAsUser);
             }
