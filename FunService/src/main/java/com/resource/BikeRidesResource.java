@@ -211,68 +211,72 @@ public class BikeRidesResource {
             BikeRide updatedBikeRide = root.BikeRides.get(0);
             BikeRide currentBikeRide = collectionBikeRides.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
 
-            if (currentBikeRide != null && SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
+            if (currentBikeRide != null) {
+                if (SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
 
-                switch (type) {
-                    case UPDATE_TYPE:
-                        //Do not allow user to update rideLeaderId or cityLocationId
-                        updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
-                        Location updatedLocation = updatedBikeRide.location;
-                        Location currentLocation = currentBikeRide.location;
+                    switch (type) {
+                        case UPDATE_TYPE:
+                            //Do not allow user to update rideLeaderId or cityLocationId
+                            updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
+                            Location updatedLocation = updatedBikeRide.location;
+                            Location currentLocation = currentBikeRide.location;
 
-                        if (
-                                ((updatedLocation.streetAddress == null) ? (currentLocation.streetAddress != null) : !updatedLocation.streetAddress.equals(currentLocation.streetAddress)) ||
-                                        ((updatedLocation.city == null) ? (currentLocation.city != null) : !updatedLocation.city.equals(currentLocation.city)) ||
-                                        ((updatedLocation.state == null) ? (currentLocation.state != null) : !updatedLocation.state.equals(currentLocation.state)) ||
-                                        ((updatedLocation.zip == null) ? (currentLocation.zip != null) : !updatedLocation.zip.equals(currentLocation.zip)) ||
-                                        ((updatedLocation.country == null) ? (currentLocation.country != null) : !updatedLocation.country.equals(currentLocation.country))
-                                ) {
+                            if (
+                                    ((updatedLocation.streetAddress == null) ? (currentLocation.streetAddress != null) : !updatedLocation.streetAddress.equals(currentLocation.streetAddress)) ||
+                                            ((updatedLocation.city == null) ? (currentLocation.city != null) : !updatedLocation.city.equals(currentLocation.city)) ||
+                                            ((updatedLocation.state == null) ? (currentLocation.state != null) : !updatedLocation.state.equals(currentLocation.state)) ||
+                                            ((updatedLocation.zip == null) ? (currentLocation.zip != null) : !updatedLocation.zip.equals(currentLocation.zip)) ||
+                                            ((updatedLocation.country == null) ? (currentLocation.country != null) : !updatedLocation.country.equals(currentLocation.country))
+                                    ) {
 
-                            //Validate real address:
-                            if (!GoogleGeocoderApiHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
-                                    !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
-                                return Response.status(Response.Status.BAD_REQUEST).build();
+                                //Validate real address:
+                                if (!GoogleGeocoderApiHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
+                                        !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
+                                    return Response.status(Response.Status.BAD_REQUEST).build();
+                                }
                             }
-                        }
 
-                        if (!currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
-                            //Delete Old
+                            if (!currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
+                                //Delete Old
+                                ImageHelper imageHelper = new ImageHelper();
+                                imageHelper.deleteImage(currentBikeRide.imagePath);
+
+                                //Update to new image path
+                                updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
+                            }
+
+                            //update the object
+                            collectionBikeRides.save(updatedBikeRide);
+
+                            updatedBikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(updatedBikeRide, geoLoc);
+
+                            response = Response.status(Response.Status.OK).entity(updatedBikeRide).build();
+
+                            LOG.info("Update BikeRide: " + updatedBikeRide.id);
+                            break;
+                        case DELETE_TYPE:
+                            //Remove ride
+                            collectionBikeRides.remove(new ObjectId(currentBikeRide.id));
+
+                            //Remove ride image
                             ImageHelper imageHelper = new ImageHelper();
                             imageHelper.deleteImage(currentBikeRide.imagePath);
 
-                            //Update to new image path
-                            updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
-                        }
+                            int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
+                            updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
 
-                        //update the object
-                        collectionBikeRides.save(updatedBikeRide);
+                            response = Response.status(Response.Status.OK).entity("Bike Ride Deleted").build();
 
-                        updatedBikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(updatedBikeRide, geoLoc);
+                            LOG.info("Delete BikeRide: " + currentBikeRide.id);
+                            break;
+                    }
 
-                        response = Response.status(Response.Status.OK).entity(updatedBikeRide).build();
+                    //Update the user with updated active timestamp
+                    updateLatestActiveTimeStamp(updatedBikeRide.rideLeaderId);
 
-                        LOG.info("Update BikeRide: " + updatedBikeRide.id);
-                        break;
-                    case DELETE_TYPE:
-                        //Remove ride
-                        collectionBikeRides.remove(new ObjectId(currentBikeRide.id));
-
-                        //Remove ride image
-                        ImageHelper imageHelper = new ImageHelper();
-                        imageHelper.deleteImage(currentBikeRide.imagePath);
-
-                        int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
-                        updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
-
-                        response = Response.status(Response.Status.OK).entity("Bike Ride Deleted").build();
-
-                        LOG.info("Delete BikeRide: " + currentBikeRide.id);
-                        break;
+                } else {
+                    response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: You are not the owner of this ride").build();
                 }
-
-                //Update the user with updated active timestamp
-                updateLatestActiveTimeStamp(updatedBikeRide.rideLeaderId);
-
             } else {
                 response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Bike Ride").build();
             }
