@@ -1,19 +1,31 @@
 //package com.resource.test;
 //
+//import com.db.MongoDatabase;
+//import com.model.*;
+//import com.settings.SharedStaticValues;
 //import com.sun.jersey.api.client.ClientResponse;
+//import com.tools.CommonBikeRideCalls;
 //import com.tools.GoogleGeocoderApiHelper;
+//import com.tools.ImageHelper;
+//import com.tools.SecurityTools;
 //import junit.framework.TestCase;
 //
+//import org.apache.commons.lang.StringUtils;
+//import org.bson.types.ObjectId;
 //import org.joda.time.DateTime;
+//import org.joda.time.DateTimeZone;
+//import org.jongo.MongoCollection;
 //import org.junit.Test;
 //
-//import com.model.BikeRide;
-//import com.model.Location;
 //import com.sun.jersey.api.client.Client;
 //import com.sun.jersey.api.client.WebResource;
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
+//
+//import javax.ws.rs.core.Response;
+//import java.util.ArrayList;
+//import java.util.List;
 //
 ///**
 //* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
@@ -25,8 +37,8 @@
 //
 //	//	private static final Logger LOG = Logger.getLogger(TestBikeRideResource.class.getCanonicalName());
 //	protected static final String WEB_APP_NAME = "FunService";
-//	//protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
-//		protected static final String BASE_URI = "http:/www.bikefunfinder.com/" + WEB_APP_NAME; //Test
+//	protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
+//	//protected static final String BASE_URI = "http://24.21.204.4/" + WEB_APP_NAME; //Test
 //	protected static final String REST_URI = BASE_URI + "/" + "rest";
 //
 //	protected ClientConfig getDefaultClientConfig() {
@@ -43,32 +55,193 @@
 //			client.addFilter(new LoggingFilter());
 //			WebResource webResource = client.resource(REST_URI);
 //
-//			//			//CLEAR THE DB WARNING.....
-//			//			webResource
-//			//			.path("/WARNING/CLEAR_AND_RESET_DB")
-//			//			.type("application/json")
-//			//			.post(ClientResponse.class);
+//            Location geolocation = new Location();
+//            geolocation.streetAddress = ("1000 SE Main St.");
+//            geolocation.city = ("Portland");
+//            geolocation.state = ("OR");
+//            GoogleGeocoderApiHelper.setGeoLocation(geolocation);
+//            GeoLoc geoLoc = geolocation.geoLoc;
 //
-//			//			PopulateDB populate = new PopulateDB();
-//			//			populate.populateDB(webResource);
+//            BikeRide bikeRide = new BikeRide();
+//            bikeRide.bikeRideName = "lance ride updated";
+//            bikeRide.targetAudience = "Family Friendly";
+//            Location location = new Location();
+//            location.city = "portland";
+//            location.state = "or";
+//            location.streetAddress = "800 SE Ankeny";
+//            bikeRide.location = location;
+//            bikeRide.details = "lkj";
+//            bikeRide.trackingAllowed = true;
+//            bikeRide.rideStartTime = new Long("1368646200000");
+//            bikeRide.id = "51947d120364cf253dc145d7";
 //
-//			String bikeRideID = "51466d5703645990b9d1facf";
-//			Location location = new Location();
-//			location.streetAddress=("1000 SE Main St.");
-//			location.city=("Portland");
-//			location.state = ("OR");
-//			GoogleGeocoderApiHelper.setGeoLocation(location);
+//            AnonymousUser anonymousUser = new AnonymousUser();
+//            anonymousUser.id = "5192642a0364eb6f86974361";
+//            DeviceAccount deviceAccount = new DeviceAccount();
+//            deviceAccount.deviceUUID = "55AF6E1D-F0B9-4F13-9F9F-3B2ACAF0B923";
+//            deviceAccount.key = "1367287282251";
+//            anonymousUser.deviceAccount = deviceAccount;
+//            anonymousUser.imagePath = "www.BikeFunFinder.com/BikeFunFinderImages/Users/defaultUser.jpg";
+//            anonymousUser.userName = "Anonymous";
+//            anonymousUser.joinedTimeStamp = new Long("1368548394390");
+//            anonymousUser.readTipsForRideLeaders = false;
+//            anonymousUser.latestActiveTimeStamp = new Long("1368685842936");
+//            anonymousUser.totalHostedBikeRideCount = 9;
 //
-//			BikeRide bikeRide = webResource
-//					.path("bikerides/" + bikeRideID + "/geoloc="+location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//					.type("application/json")
-//					.get(BikeRide.class);
+//            Root root = new Root();
+//            List<BikeRide> bikeRideList = new ArrayList<BikeRide>();
+//            bikeRideList.add(bikeRide);
+//            root.BikeRides = bikeRideList;
+//            root.AnonymousUser = anonymousUser;
 //
-//			assertNotNull(bikeRide);
+//            SharedStaticValues.UpdateType type = SharedStaticValues.UpdateType.UPDATE_TYPE;
+//
+//            MongoDatabase.ConnectToDb();
+//
+//            try
+//            {
+//                //copy in code here.
+//                String userId = "";
+//                boolean validUser = false;
+//
+//                if (root.AnonymousUser != null) {
+//                    userId = root.AnonymousUser.id;
+//                    validUser = SecurityTools.isValidAnonymousUser(userId,
+//                            root.AnonymousUser.deviceAccount.key,
+//                            root.AnonymousUser.deviceAccount.deviceUUID);
+//                } else if (root.User != null && root.User.oAuth != null && root.User.deviceAccount != null) {
+//                    userId = root.User.id;
+//                    validUser = SecurityTools.isLoggedIn(root.User) && SecurityTools.isValidUser(userId, root.User.deviceAccount.deviceUUID);
+//                }
+//
+//                //Validate that the client has access
+//                if (validUser && root.BikeRides != null && root.BikeRides.size() == 1) {
+//
+//                    //Get the object and validate that the client has access to the ride.
+//                    MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
+//                    BikeRide updatedBikeRide = root.BikeRides.get(0);
+//                    BikeRide currentBikeRide = collectionBikeRides.findOne(new ObjectId(updatedBikeRide.id)).as(BikeRide.class);
+//
+//                    if (currentBikeRide != null) {
+//                        if (SecurityTools.isValidOwnerOfRide(userId, currentBikeRide.rideLeaderId)) {
+//
+//                            switch (type) {
+//                                case UPDATE_TYPE:
+//                                    //Do not allow user to update rideLeaderId or cityLocationId
+//                                    updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
+//                                    Location updatedLocation = updatedBikeRide.location;
+//                                    Location currentLocation = currentBikeRide.location;
+//
+//                                    if (
+//                                            ((updatedLocation.streetAddress == null) ? (currentLocation.streetAddress != null) : !updatedLocation.streetAddress.equals(currentLocation.streetAddress)) ||
+//                                            ((updatedLocation.city == null) ? (currentLocation.city != null) : !updatedLocation.city.equals(currentLocation.city)) ||
+//                                            ((updatedLocation.state == null) ? (currentLocation.state != null) : !updatedLocation.state.equals(currentLocation.state)) ||
+//                                            ((updatedLocation.zip == null) ? (currentLocation.zip != null) : !updatedLocation.zip.equals(currentLocation.zip)) ||
+//                                            ((updatedLocation.country == null) ? (currentLocation.country != null) : !updatedLocation.country.equals(currentLocation.country))
+//                                            ) {
+//
+//                                        //Validate real address:
+//                                        if (!GoogleGeocoderApiHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
+//                                                !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
+//                                            String fail = "";
+//                                            ///////return Response.status(Response.Status.BAD_REQUEST).build();
+//                                        }
+//                                    } else {
+//                                        updatedLocation = currentLocation;
+//                                    }
+//
+//                                    //Delete old image if needed.
+//                                    if (StringUtils.isNotBlank(currentBikeRide.imagePath) &&
+//                                        !currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
+//                                        //Delete Old
+//                                        ImageHelper imageHelper = new ImageHelper();
+//                                        imageHelper.deleteImage(currentBikeRide.imagePath);
+//
+//                                    }
+//
+//                                    //Add new image if needed
+//                                    if (StringUtils.isNotBlank(updatedBikeRide.imagePath) &&
+//                                        !updatedBikeRide.imagePath.equals(currentBikeRide.imagePath)) {
+//                                        //Update to new image path
+//                                        ////////updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
+//                                    }
+//
+//                                    //update the object
+//                                    collectionBikeRides.save(updatedBikeRide);
+//
+//                                    updatedBikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(updatedBikeRide, geoLoc);
+//
+//
+//                                    String success = "";
+//                                    ///////response = Response.status(Response.Status.OK).entity(updatedBikeRide).build();
+//
+//                                    /////////LOG.info("Update BikeRide: " + updatedBikeRide.id);
+//                                    break;
+//                                case DELETE_TYPE:
+////                                    //Remove ride
+////                                    collectionBikeRides.remove(new ObjectId(currentBikeRide.id));
+////
+////                                    //Remove ride image
+////                                    ImageHelper imageHelper = new ImageHelper();
+////                                    imageHelper.deleteImage(currentBikeRide.imagePath);
+////
+////                                    int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
+////                                    updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
+////
+////                                    response = Response.status(Response.Status.OK).entity("Bike Ride Deleted").build();
+////
+////                                    LOG.info("Delete BikeRide: " + currentBikeRide.id);
+////                                    break;
+//                            }
+//
+//                            //Update the user with updated active timestamp
+//                            updateLatestActiveTimeStamp(updatedBikeRide.rideLeaderId);
+//
+//                        } else {
+//                            String fail = "";
+//                            ///////response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: You are not the owner of this ride").build();
+//                        }
+//                    } else {
+//                        String fail = "";
+//                        ///////response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid Bike Ride").build();
+//                    }
+//                } else {
+//                    //Invalid user for this ride.
+//                    String fail = "";
+//                    ///////response = Response.status(Response.Status.FORBIDDEN).entity("Error: No Access").build();
+//                }
+//            }
+//            catch (Exception e)
+//            {
+//                e.printStackTrace();
+//            }
+//
+//            MongoDatabase.mongoClient.close();
+//
+//
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
 //	}
+//
+//    private void updateLatestActiveTimeStamp(String userId) {
+//        try {
+//            //Update User that created the ride.
+//            MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.ANONYMOUS_USERS);
+//            AnonymousUser rideLeaderAsAnonymousUser = auCollection.findOne(new ObjectId(userId)).as(AnonymousUser.class);
+//            if (rideLeaderAsAnonymousUser != null) {
+//                rideLeaderAsAnonymousUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+//                auCollection.save(rideLeaderAsAnonymousUser);
+//            } else {
+//                MongoCollection userCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.USERS);
+//                User rideLeaderAsUser = userCollection.findOne(new ObjectId(userId)).as(User.class);
+//                rideLeaderAsUser.latestActiveTimeStamp = new DateTime().withZone(DateTimeZone.UTC).toInstant().getMillis();
+//                userCollection.save(rideLeaderAsUser);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 //
 //	@Test
 //	public void testFunServiceNewBikeRide() {

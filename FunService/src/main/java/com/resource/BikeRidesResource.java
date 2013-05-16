@@ -167,7 +167,7 @@ public class BikeRidesResource {
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e.getMessage()).build();
 		}
 		return response;
 	}
@@ -183,7 +183,7 @@ public class BikeRidesResource {
 		} catch (Exception e) {
 			LOG.error(e);
 			e.printStackTrace();
-			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e).build();
+			response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: " + e.getMessage()).build();
 		}
 		return response;
 	}
@@ -234,14 +234,30 @@ public class BikeRidesResource {
                                         !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
                                     return Response.status(Response.Status.BAD_REQUEST).build();
                                 }
+                            } else {
+                                //Pull in the geo details.
+                                updatedBikeRide.location = currentLocation;
                             }
 
-                            if (!currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
+                            //New image indicator
+                            boolean newImage = false;
+
+                            //Delete old image if needed.
+                            if (StringUtils.isNotBlank(currentBikeRide.imagePath) &&
+                                    !currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
                                 //Delete Old
                                 ImageHelper imageHelper = new ImageHelper();
                                 imageHelper.deleteImage(currentBikeRide.imagePath);
+                                newImage = true;
+                            }
 
-                                //Update to new image path
+                            //Add new image if needed
+                            if (StringUtils.isNotBlank(updatedBikeRide.imagePath) &&
+                                    !updatedBikeRide.imagePath.equals(currentBikeRide.imagePath)) {
+                                newImage = true;
+                            }
+
+                            if (newImage) {
                                 updatedBikeRide.imagePath = getImagePath(updatedBikeRide.imagePath);
                             }
 

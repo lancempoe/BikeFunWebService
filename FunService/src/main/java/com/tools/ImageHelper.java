@@ -1,5 +1,7 @@
 package com.tools;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +22,8 @@ public class ImageHelper {
     public boolean deleteImage(String fileLocation) {
 
         //Do not delete the default images
-        if (fileLocation.contains(defaultBikeRideImage) ||
+        if (StringUtils.isBlank(fileLocation) ||
+            fileLocation.contains(defaultBikeRideImage) ||
             fileLocation.contains(defaultUserImage)) { return true; }
 
         boolean success = false;
