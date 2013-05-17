@@ -227,21 +227,17 @@ public class BikeRidesResource {
                                             ((updatedLocation.zip == null) ? (currentLocation.zip != null) : !updatedLocation.zip.equals(currentLocation.zip)) ||
                                             ((updatedLocation.country == null) ? (currentLocation.country != null) : !updatedLocation.country.equals(currentLocation.country))
                                     ) {
-                                LOG.info("passed if");
                                 //Validate real address:
                                 if (!GoogleGeocoderApiHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
                                         !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
-                                    LOG.info("bad request");
                                     return Response.status(Response.Status.BAD_REQUEST).build();
                                 }
                             } else {
-                                LOG.info("in the else: "+currentLocation.id);
                                 //Pull in the geo details.
-                                updatedBikeRide.location = currentLocation;
-                                updatedBikeRide.cityLocationId = currentLocation.id;
+                                updatedBikeRide.location = currentBikeRide.location;
+                                updatedBikeRide.cityLocationId = currentBikeRide.cityLocationId;
                             }
 
-                            LOG.info("off and doing stuff, updatedBikeRide.cityLocationId="+updatedBikeRide.cityLocationId);
                             //New image indicator
                             boolean newImage = false;
 
