@@ -215,6 +215,7 @@ public class BikeRidesResource {
                         case UPDATE_TYPE:
                             //Do not allow user to update rideLeaderId or cityLocationId
                             updatedBikeRide.rideLeaderId = currentBikeRide.rideLeaderId;
+                            updatedBikeRide.rideLeaderName = currentBikeRide.rideLeaderName;
                             Location updatedLocation = updatedBikeRide.location;
                             Location currentLocation = currentBikeRide.location;
 
@@ -234,6 +235,7 @@ public class BikeRidesResource {
                             } else {
                                 //Pull in the geo details.
                                 updatedBikeRide.location = currentLocation;
+                                updatedBikeRide.cityLocationId = currentLocation.id;
                             }
 
                             //New image indicator
