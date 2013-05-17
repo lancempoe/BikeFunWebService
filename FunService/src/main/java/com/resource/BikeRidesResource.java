@@ -235,7 +235,7 @@ public class BikeRidesResource {
                                     return Response.status(Response.Status.BAD_REQUEST).build();
                                 }
                             } else {
-                                LOG.info("in the else");
+                                LOG.info("in the else: "+currentLocation.id);
                                 //Pull in the geo details.
                                 updatedBikeRide.location = currentLocation;
                                 updatedBikeRide.cityLocationId = currentLocation.id;
