@@ -219,7 +219,7 @@ public class BikeRidesResource {
                             Location updatedLocation = updatedBikeRide.location;
                             Location currentLocation = currentBikeRide.location;
 
-                            LOG.error("Updating.. ");
+                            LOG.info("Updating.. ");
                             if (
                                     ((updatedLocation.streetAddress == null) ? (currentLocation.streetAddress != null) : !updatedLocation.streetAddress.equals(currentLocation.streetAddress)) ||
                                             ((updatedLocation.city == null) ? (currentLocation.city != null) : !updatedLocation.city.equals(currentLocation.city)) ||
@@ -227,21 +227,21 @@ public class BikeRidesResource {
                                             ((updatedLocation.zip == null) ? (currentLocation.zip != null) : !updatedLocation.zip.equals(currentLocation.zip)) ||
                                             ((updatedLocation.country == null) ? (currentLocation.country != null) : !updatedLocation.country.equals(currentLocation.country))
                                     ) {
-                                LOG.error("passed if");
+                                LOG.info("passed if");
                                 //Validate real address:
                                 if (!GoogleGeocoderApiHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
                                         !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
-                                    LOG.error("bad request");
+                                    LOG.info("bad request");
                                     return Response.status(Response.Status.BAD_REQUEST).build();
                                 }
                             } else {
-                                LOG.error("in the else");
+                                LOG.info("in the else");
                                 //Pull in the geo details.
                                 updatedBikeRide.location = currentLocation;
                                 updatedBikeRide.cityLocationId = currentLocation.id;
                             }
 
-                            LOG.error("off and doing stuff, updatedBikeRide.cityLocationId="+updatedBikeRide.cityLocationId);
+                            LOG.info("off and doing stuff, updatedBikeRide.cityLocationId="+updatedBikeRide.cityLocationId);
                             //New image indicator
                             boolean newImage = false;
 
