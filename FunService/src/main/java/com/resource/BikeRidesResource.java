@@ -4,10 +4,7 @@ import com.db.MongoDatabase;
 import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.*;
 import com.settings.SharedStaticValues;
-import com.tools.CommonBikeRideCalls;
-import com.tools.GoogleGeocoderApiHelper;
-import com.tools.ImageHelper;
-import com.tools.SecurityTools;
+import com.tools.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -116,7 +113,7 @@ public class BikeRidesResource {
                         MongoCollection collectionBikeRides = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
                         collectionBikeRides.save(bikeRide);
 
-                        int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
+                        final int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", bikeRide.rideLeaderId);
                         updateTotalHostedBikeRideCount(bikeRide.rideLeaderId, totalHostedBikeRideCount);
 
                         bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
@@ -245,7 +242,6 @@ public class BikeRidesResource {
                             //Delete old image if needed.
                             if (StringUtils.isNotBlank(currentBikeRide.imagePath) &&
                                     !currentBikeRide.imagePath.equals(updatedBikeRide.imagePath)) {
-                                //Delete Old
                                 ImageHelper imageHelper = new ImageHelper();
                                 imageHelper.deleteImage(currentBikeRide.imagePath);
                                 newImage = true;
@@ -278,8 +274,12 @@ public class BikeRidesResource {
                             ImageHelper imageHelper = new ImageHelper();
                             imageHelper.deleteImage(currentBikeRide.imagePath);
 
-                            int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
+                            //Update user TotalHostedBikeRideCount
+                            final int totalHostedBikeRideCount = (int) collectionBikeRides.count("{rideLeaderId:#}", currentBikeRide.rideLeaderId);
                             updateTotalHostedBikeRideCount(currentBikeRide.rideLeaderId, totalHostedBikeRideCount);
+
+                            //Delete all tracks
+                            TrackingHelper.deleteTrackings(currentBikeRide);
 
                             response = Response.status(Response.Status.OK).entity("Bike Ride Deleted").build();
 

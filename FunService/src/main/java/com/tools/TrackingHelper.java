@@ -54,8 +54,6 @@ public class TrackingHelper {
 
 			MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 
-			//Because of the gte, it is possible that 1/1000 of the results will be duplicated.
-			//If changed to gt, then 1/1000 tracks may not be returned.  Depends on client speeds.
 			Iterable<Tracking> trackings = trackingCollection
                     .find("{distinct: \"Tracking\", key: \"trackingUserId\", bikeRideId: #, trackingUserId: #, trackingTime: {$gte: #}}",
 							bikeRide.id, 
@@ -87,6 +85,18 @@ public class TrackingHelper {
 		MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 		setBikeRideTrackingDetails(bikeRide, geoLoc, trackingCollection, clientHeartBeat);
 	}
+
+    /**
+     * Find and delete all tracks for a deleted Event
+     * @author lancepoehler
+     * @throws Exception
+     */
+    public static void deleteTrackings(BikeRide bikeRide) throws Exception {
+
+        MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
+        trackingCollection.remove("{bikeRideId:#}", bikeRide.id);
+
+    }
 
 	/**
 	 * Get the distance from the client, if the ride is currently tracking, and total people that have at one time tracked this ride.
