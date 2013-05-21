@@ -68,6 +68,7 @@ public class TrackingHelper {
 				for (Tracking track : trackingList) {
                      if (!finalTrackIds.contains(track.trackingUserId)) {
                         finalTrackingList.add(track);
+                        finalTrackIds.add(track.trackingUserId);
                      }
                 }
 
