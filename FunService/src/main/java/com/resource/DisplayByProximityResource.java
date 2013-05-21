@@ -36,7 +36,7 @@ public class DisplayByProximityResource {
 
     private static final Log LOG = LogFactory.getLog(DisplayByProximityResource.class);
 
-	private static final Double ONE_DEGREE_IN_MILES = 69.11; //1� of latitude = about 69.11 miles.
+	private static final Double ONE_DEGREE_IN_MILES = 69.11; //1 degree of latitude = about 69.11 miles.
 	private static final int RADIUS_IN_MILES = 3;
 	private static final int TIME_IN_MINUTES = 60;
 

@@ -55,15 +55,23 @@ public class TrackingHelper {
 			MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 
 			Iterable<Tracking> trackings = trackingCollection
-                    .find("{distinct: \"Tracking\", key: \"trackingUserId\", bikeRideId: #, trackingUserId: #, trackingTime: {$gte: #}}",
-							bikeRide.id, 
-							bikeRide.rideLeaderId, 
+                    .find("{ \"query\": { \"bikeRideId\": #, \"trackingUserId\": {$ne : # } }, $orderby:{\"timestamp\" : -1}, \"trackingTime\": {$gte: #} }",
+							bikeRide.id,
+							bikeRide.rideLeaderId,
 							clientHeartBeat)
 					.as(Tracking.class);
-					
-			List<Tracking> trackingList = Lists.newArrayList(trackings);
+
+            List<String> finalTrackIds = new ArrayList(); //Unique list of trackers... This works because of $orderby
+            List<Tracking> finalTrackingList = new ArrayList(); //Most recent of each tracker track
+			List<Tracking> trackingList = Lists.newArrayList(trackings); //All tracks in past
 			if (trackingList != null && trackingList.size() > 0) {
-				bikeRidetrackings = trackingList;
+				for (Tracking track : trackingList) {
+                     if (!finalTrackIds.contains(track.trackingUserId)) {
+                        finalTrackingList.add(track);
+                     }
+                }
+
+                bikeRidetrackings = finalTrackingList;
 			}
 		}
 		return bikeRidetrackings;
