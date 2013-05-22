@@ -17,6 +17,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -37,13 +39,13 @@ public class BikeRidesResource {
 
 	@GET
 	@Path("{id}/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
-	public Response getBikeRide(@PathParam("id") String id, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
+	public Response getBikeRide(String clientId, @PathParam("id") String id, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
         Response response;
         if (GoogleGeocoderApiHelper.isValidGeoLoc(latitude, longitude)) {
             GeoLoc geoLoc = new GeoLoc();
             geoLoc.latitude = latitude;
             geoLoc.longitude = longitude;
-            response = getRide(id, geoLoc);
+            response = getRide(id, geoLoc, clientId);
         } else {
             response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Invalid GeoLocation").build();
         }
@@ -57,7 +59,7 @@ public class BikeRidesResource {
 	 * @return
 	 * @throws Exception
 	 */
-	private Response getRide(String id, GeoLoc geoLoc) {
+	private Response getRide(String id, GeoLoc geoLoc, String clientId) {
         Response response = null;
         try
 		{
@@ -70,6 +72,19 @@ public class BikeRidesResource {
 			//build tracking items.
 			if (bikeRide != null) {
 				bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
+
+                //Clear out all clientId tracks... They won't need to see their own tracks.. clutters the screen.
+                if (bikeRide.rideLeaderTracking!=null && bikeRide.rideLeaderTracking.trackingUserName.equals(clientId)) {
+                    bikeRide.rideLeaderTracking = null;
+                }
+                List<Tracking> trackings = new ArrayList<Tracking>();
+                for (Tracking tracking : bikeRide.currentTrackings) {
+                    if (!tracking.trackingUserId.equals(clientId)) {
+                        trackings.add(tracking);
+                    }
+                }
+                bikeRide.currentTrackings = trackings;
+
                 response = Response.status(Response.Status.OK).entity(bikeRide).build();
 			}
 		}
