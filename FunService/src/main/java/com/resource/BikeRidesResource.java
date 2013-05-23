@@ -37,7 +37,7 @@ import java.util.UUID;
 public class BikeRidesResource {
     private static final Log LOG = LogFactory.getLog(BikeRidesResource.class);
 
-	@GET
+	@POST
 	@Path("{id}/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
 	public Response getBikeRide(String clientId, @PathParam("id") String id, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
         Response response;
