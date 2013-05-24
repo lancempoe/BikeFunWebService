@@ -37,7 +37,7 @@ import java.util.UUID;
 public class BikeRidesResource {
     private static final Log LOG = LogFactory.getLog(BikeRidesResource.class);
 
-	@POST
+	@GET
 	@Path("{id}/geoloc={latitude: ([-]?[0-9]+).([0-9]+)},{longitude: ([-]?[0-9]+).([0-9]+)}")
 	public Response getBikeRide(String clientId, @PathParam("id") String id, @PathParam("latitude") BigDecimal latitude, @PathParam("longitude") BigDecimal longitude) {
         Response response;
@@ -59,7 +59,7 @@ public class BikeRidesResource {
 	 * @return
 	 * @throws Exception
 	 */
-	private Response getRide(String id, GeoLoc geoLoc, String clientId) {
+	protected Response getRide(String id, GeoLoc geoLoc, String clientId) {
         Response response = null;
         try
 		{
@@ -78,9 +78,12 @@ public class BikeRidesResource {
                     bikeRide.rideLeaderTracking = null;
                 }
                 List<Tracking> trackings = new ArrayList<Tracking>();
-                for (Tracking tracking : bikeRide.currentTrackings) {
-                    if (!tracking.trackingUserId.equals(clientId)) {
-                        trackings.add(tracking);
+
+                if (bikeRide.currentTrackings != null) {
+                    for (Tracking tracking : bikeRide.currentTrackings) {
+                        if (!tracking.trackingUserId.equals(clientId)) {
+                            trackings.add(tracking);
+                        }
                     }
                 }
                 bikeRide.currentTrackings = trackings;
