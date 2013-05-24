@@ -39,6 +39,7 @@
 //	protected static final String WEB_APP_NAME = "FunService";
 //	protected static final String BASE_URI = "http://localhost:" + 8080 + "/" + WEB_APP_NAME; //Local
 //	//protected static final String BASE_URI = "http://24.21.204.4/" + WEB_APP_NAME; //Test
+//    //protected static final String BASE_URI = "http://service.bikefunfinder.com/" + WEB_APP_NAME; //Test
 //	protected static final String REST_URI = BASE_URI + "/" + "rest";
 //
 //	protected ClientConfig getDefaultClientConfig() {
@@ -58,6 +59,9 @@
 //
 //            MongoDatabase.ConnectToDb();
 //
+//            String clientId = "5192642a0364eb6f86974361";
+//
+//
 //            Location geolocation = new Location();
 //            geolocation.streetAddress = ("1000 SE Main St.");
 //            geolocation.city = ("Portland");
@@ -65,16 +69,42 @@
 //            GoogleGeocoderApiHelper.setGeoLocation(geolocation);
 //            GeoLoc geoLoc = geolocation.geoLoc;
 //
-//            BikeRide bikeRide = null;
 //
-//            //Get the object using Jongo
-//            MongoCollection collection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
-//            bikeRide = collection.findOne(new ObjectId("519ad9e30364f1fec3ade80e")).as(BikeRide.class);
+//            try
+//            {
+//                BikeRide bikeRide = null;
 //
-//            //build tracking items.
-//            if (bikeRide != null) {
-//                bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
+//                //Get the object using Jongo
+//                MongoCollection collection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
+//                bikeRide = collection.findOne(new ObjectId("519edfcb036493a80d72345d")).as(BikeRide.class);
+//
+//                //build tracking items.
+//                if (bikeRide != null) {
+//                    bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
+//
+//                    //Clear out all clientId tracks... They won't need to see their own tracks.. clutters the screen.
+//                    if (bikeRide.rideLeaderTracking!=null && bikeRide.rideLeaderTracking.trackingUserName.equals(clientId)) {
+//                        bikeRide.rideLeaderTracking = null;
+//                    }
+//                    List<Tracking> trackings = new ArrayList<Tracking>();
+//
+//                    if (bikeRide.currentTrackings != null) {
+//                        for (Tracking tracking : bikeRide.currentTrackings) {
+//                            if (!tracking.trackingUserId.equals(clientId)) {
+//                                trackings.add(tracking);
+//                            }
+//                        }
+//                    }
+//                    bikeRide.currentTrackings = trackings;
+//
+//                }
 //            }
+//            catch (Exception e)
+//            {
+//                e.printStackTrace();
+//            }
+//
+//
 //
 //            MongoDatabase.mongoClient.close();
 //

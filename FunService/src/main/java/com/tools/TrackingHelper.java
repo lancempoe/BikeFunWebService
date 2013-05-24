@@ -55,7 +55,9 @@ public class TrackingHelper {
 			MongoCollection trackingCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.TRACKING);
 
 			Iterable<Tracking> trackings = trackingCollection
-                    .find("{ \"query\": { \"bikeRideId\": #, \"trackingUserId\": {$ne : # } }, $orderby:{\"timestamp\" : -1}, \"trackingTime\": {$gte: #} }",
+
+
+                    .find("{ \"query\": { \"bikeRideId\": #, \"trackingUserId\": {$ne : # }, \"trackingTime\": {$gte: #} }, $orderby:{\"timestamp\" : -1} }",
 							bikeRide.id,
 							bikeRide.rideLeaderId,
 							clientHeartBeat)
