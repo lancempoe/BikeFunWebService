@@ -119,6 +119,7 @@ public class DisplayByTimeResource {
             } else {
                 //**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
                 //Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
+                LOG.error("getDisplay closestLocation is good("+closestLocation.geoLoc.latitude+","+closestLocation.geoLoc.longitude+")");
                 Iterable<BikeRide> bikeRides = getRidesFromDB(root.ClosestLocation.id, yesterday, bikeCollection);
                 root.BikeRides.addAll(Lists.newArrayList(bikeRides));
             }
@@ -138,6 +139,7 @@ public class DisplayByTimeResource {
 	}
 
     private Iterable<BikeRide> getRidesFromDB(String closetsLocationId, Long yesterday, MongoCollection bikeCollection) {
+        LOG.error("getRidesFromDB closetsLocationId("+closetsLocationId+"), yesterday("+yesterday+")");
         return bikeCollection
                 .find("{rideStartTime: {$gt: #}, cityLocationId: #}",
                         yesterday,
@@ -149,6 +151,7 @@ public class DisplayByTimeResource {
     }
 
     private Iterable<BikeRide> getRidesFromDB(Long yesterday, MongoCollection bikeCollection) {
+        LOG.error("getRidesFromDB yesterday("+yesterday+")");
         return bikeCollection
                 .find("{rideStartTime: {$gt: #}}",
                         yesterday)
