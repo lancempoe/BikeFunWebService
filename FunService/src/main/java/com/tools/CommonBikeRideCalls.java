@@ -66,9 +66,11 @@ public class CommonBikeRideCalls {
     }
 
     public static List<BikeRide> postBikeRideDBUpdates(List<BikeRide> bikeRides, GeoLoc geoLoc) throws Exception {
+        List<BikeRide> updatedBikeRides = new ArrayList<BikeRide>();
         for (BikeRide bikeRide : bikeRides) {
             bikeRide = postBikeRideDBUpdates(bikeRide, geoLoc);
+            updatedBikeRides.add(bikeRide);
         }
-        return bikeRides;
+        return updatedBikeRides;
     }
 }
