@@ -78,8 +78,7 @@
     </filter>
 
     <filter-mapping>
-        <!-- CORS Filter mapping -->
         <filter-name>CORS</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/rest/*</url-pattern>
     </filter-mapping>
 </web-app>
