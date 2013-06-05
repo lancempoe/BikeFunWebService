@@ -44,7 +44,6 @@ public class UsersResource {
 	 * @throws Exception 
 	 */
 	@GET
-    @OPTIONS
 	@Path("/anonymous/{key}/{deviceUUID}")
 	public Response getAnonymousUser(@PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID) throws Exception {
         Response response;
