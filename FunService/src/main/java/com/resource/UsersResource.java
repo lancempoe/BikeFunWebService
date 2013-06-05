@@ -44,8 +44,8 @@ public class UsersResource {
 	 * @throws Exception 
 	 */
 	@GET
+    @OPTIONS
 	@Path("/anonymous/{key}/{deviceUUID}")
-    @Consumes (MediaType.MEDIA_TYPE_WILDCARD)
 	public Response getAnonymousUser(@PathParam("key") String key, @PathParam("deviceUUID") String deviceUUID) throws Exception {
         Response response;
 
