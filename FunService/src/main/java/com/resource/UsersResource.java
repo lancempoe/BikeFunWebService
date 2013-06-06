@@ -146,7 +146,7 @@ public class UsersResource {
                     response = Response.status(Response.Status.OK).entity(myUser).build();
                 }
             } else {
-                response = Response.status(Response.Status.FORBIDDEN).entity("Error: Not currently logged in.").build();
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Not currently logged in.").build();
             }
         } catch (Exception e) {
             LOG.error(e);
@@ -238,7 +238,7 @@ public class UsersResource {
                 }
 
             }  else {
-                response = Response.status(Response.Status.FORBIDDEN).entity("Error: Not currently logged in.").build();
+                response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: Not currently logged in.").build();
             }
         } catch (Exception e) {
             LOG.error(e);
