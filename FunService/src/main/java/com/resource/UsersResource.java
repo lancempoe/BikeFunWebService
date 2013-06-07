@@ -19,6 +19,7 @@ import org.jongo.MongoCollection;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -55,11 +56,21 @@ public class UsersResource {
             //check if already an anonymousUser
 			MongoCollection auCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.ANONYMOUS_USERS);
 			if (auCollection != null && auCollection.count() > 0) {
-				au = auCollection.findOne("{deviceAccount.deviceUUID:#}",deviceUUID).as(AnonymousUser.class);
+
+				Iterable<AnonymousUser> found =
+                        auCollection.find("{deviceAccount.deviceUUID:#, deviceAccount.key:#}",deviceUUID, key)
+                                    .sort("{latestActiveTimeStamp : 1}")
+                                    .limit(1)
+                                    .as(AnonymousUser.class);
+
+                for(AnonymousUser anonymousUser: found) {
+                    au = anonymousUser;
+                }
+
 			}
 
 			//Create new if it doesn't exist.
-			if (au == null || (!au.deviceAccount.key.equals(key))) {
+			if (au == null ) {
 				au = new AnonymousUser();
 				au.deviceAccount.deviceUUID = deviceUUID;
 				au.deviceAccount.key = key;
