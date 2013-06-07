@@ -1,8 +1,17 @@
 //package com.resource.test;
 //
+//import com.db.MongoDatabase;
+//import com.google.common.collect.Lists;
+//import com.model.BikeRide;
+//import com.model.GeoLoc;
+//import com.settings.SharedStaticValues;
+//import com.tools.CommonBikeRideCalls;
 //import com.tools.GoogleGeocoderApiHelper;
 //import junit.framework.TestCase;
 //
+//import org.joda.time.DateTime;
+//import org.joda.time.DateTimeZone;
+//import org.jongo.MongoCollection;
 //import org.junit.Test;
 //
 //import com.model.Location;
@@ -14,6 +23,9 @@
 //import com.sun.jersey.api.client.config.ClientConfig;
 //import com.sun.jersey.api.client.config.DefaultClientConfig;
 //import com.sun.jersey.api.client.filter.LoggingFilter;
+//
+//import javax.ws.rs.core.Response;
+//import java.util.List;
 //
 ///**
 //* Web Service must be turned on: glassfish3/bin/asadmin start-domain or tomcat
@@ -38,45 +50,74 @@
 //	@Test
 //	public void testDisplay_By_Proximity() throws Exception {
 //
-//		Client client = Client.create(getDefaultClientConfig());
-//		client.addFilter(new LoggingFilter());
-//		WebResource webResource = client.resource(REST_URI);
+//        MongoDatabase.ConnectToDb();
 //
-//		//CLEAR THE DB WARNING.....
-//		webResource
-//		.path("/WARNING/CLEAR_AND_RESET_DB")
-//		.type("application/json")
-//		.post(ClientResponse.class);
+//        Location geolocation = new Location();
+//        geolocation.streetAddress = ("1000 SE Main St.");
+//        geolocation.city = ("Portland");
+//        geolocation.state = ("OR");
+//        GoogleGeocoderApiHelper.setGeoLocation(geolocation);
+//        GeoLoc geoLoc = geolocation.geoLoc;
 //
-//		PopulateDB populate = new PopulateDB();
-//		populate.populateDB(webResource);
 //
-//		Location location = new Location();
-//		location.streetAddress = ("1000 SE Main St.");
-//		location.city = ("Portland");
-//		location.state = ("OR");
-//		GoogleGeocoderApiHelper.setGeoLocation(location);
+//        try
+//        {
+//            Double ONE_DEGREE_IN_MILES = 69.11; //1 degree of latitude = about 69.11 miles.
+//            int RADIUS_IN_MILES = 3;
+//            int TIME_IN_MINUTES = 60;
 //
-//		Root root = webResource
-//				.path("display/by_proximity/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.get(Root.class);
+//            Root root = new Root();
 //
-//		assertTrue(root.BikeRides.size() == 2); //1 close and in 10 mins and 1 10 mins ago but still tracking.
-//		assertTrue(root.ClosestLocation.city.equals("Portland"));
+//            //**(Identify the closest city to the client: 1 DB Call)**
+//            MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.LOCATIONS, "geoLoc");
+//            //coll.ensureIndex("{geoLoc: '2d'}") is set when getting the collection
+//            Location closestLocation = locationCollection
+//                    .findOne("{geoLoc: {$near: [#, #]}}",
+//                            geoLoc.longitude,
+//                            geoLoc.latitude)
+//                    .as(Location.class);
+//            root.ClosestLocation = closestLocation;
 //
-//		location = new Location();
-//		location.streetAddress = ("1224 2nd Street Northwest");
-//		location.city = ("SALEM");
-//		location.state = ("OR");
-//		GoogleGeocoderApiHelper.setGeoLocation(location);
+//            //**(Get BikeRide list: 3 calls to the DB)**
+//            DateTime nowDateTime = new DateTime(DateTimeZone.UTC); // Joda time
+//            DateTime maxStartTime = nowDateTime.plusMinutes(TIME_IN_MINUTES);
+//            DateTime minStartTime = nowDateTime.minusDays(1); //This will cut out most old bike rides
+//            Long now = nowDateTime.toInstant().getMillis();
+//            Long max = maxStartTime.toInstant().getMillis();
+//            Long min = minStartTime.toInstant().getMillis();
 //
-//		root = webResource
-//				.path("display/by_proximity/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-//				.type("application/json")
-//				.get(Root.class);
+//            //Get the objects using Jongo
+//            MongoCollection bikeRidesCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES, "location.geoLoc");
+//            //Currently not placing a limit on this result.  If we find this is an issue we can add later.
 //
-//		assertTrue(root.BikeRides.size() == 2); //1 in past but tracking and 1 in 10 minutes.
-//		assertTrue(root.ClosestLocation.city.equals("Salem"));
+//            bikeRidesCollection.ensureIndex("{location.geoLoc: '2d', rideStartTime: 1}");
+//            Iterable<BikeRide> all = bikeRidesCollection
+//                    .find("{location.geoLoc: {$near: [#, #], $maxDistance: #}, rideStartTime: {$lte: #, $gte: #}}",
+//                            geoLoc.longitude,
+//                            geoLoc.latitude,
+//                            RADIUS_IN_MILES/ONE_DEGREE_IN_MILES,
+//                            max ,
+//                            min )
+//                    .fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)
+//                    .as(BikeRide.class);
+//            List<BikeRide> closeBikeRides = Lists.newArrayList(all);
+//
+//            //**(Set tracking on bike rides: 2 DB call)
+//            closeBikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(closeBikeRides, geoLoc);
+//
+//            for(BikeRide closeBikeRide : closeBikeRides) {
+//                //Find all rides that haven't started AND find all bike rides still being tracked.
+//                if (closeBikeRide.rideStartTime > now || closeBikeRide.currentlyTracking) {
+//                    root.BikeRides.add(closeBikeRide);
+//                }
+//            }
+//            String test = "";
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//        }
+//        MongoDatabase.mongoClient.close();
+//        String test = "";
 //	}
 //}

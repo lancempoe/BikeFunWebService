@@ -141,7 +141,7 @@ public class BikeRidesResource {
                     } else {
                         //Invalid address
                         LOG.info("Invalid address, we're not making the ride sucker!");
-                        response = Response.status(Response.Status.CONFLICT).entity("Invalid Address").build();
+                        response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Invalid Address").build();
                     }
 
                 } else {
@@ -248,7 +248,7 @@ public class BikeRidesResource {
                                 //Validate real address:
                                 if (!GoogleGeocoderApiHelper.setGeoLocation(updatedBikeRide.location) || //Call API for ride geoCodes
                                         !GoogleGeocoderApiHelper.setBikeRideLocationId(updatedBikeRide)) { //Set the location id
-                                    return Response.status(Response.Status.BAD_REQUEST).build();
+                                    return Response.status(Response.Status.PRECONDITION_FAILED).build();
                                 }
                             } else {
                                 //Pull in the geo details.
@@ -318,7 +318,7 @@ public class BikeRidesResource {
             }
         } else {
             //Invalid user for this ride.
-            response = Response.status(Response.Status.FORBIDDEN).entity("Error: No Access").build();
+            response = Response.status(Response.Status.PRECONDITION_FAILED).entity("Error: No Access").build();
         }
         return response;
     }

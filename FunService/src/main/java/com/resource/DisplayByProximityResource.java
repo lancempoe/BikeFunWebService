@@ -115,7 +115,7 @@ public class DisplayByProximityResource {
 			List<BikeRide> closeBikeRides = Lists.newArrayList(all);
 
             //**(Set tracking on bike rides: 2 DB call)
-            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
+            closeBikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(closeBikeRides, geoLoc);
 
 			for(BikeRide closeBikeRide : closeBikeRides) {
 				//Find all rides that haven't started AND find all bike rides still being tracked.
