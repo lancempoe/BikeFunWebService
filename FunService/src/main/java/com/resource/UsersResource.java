@@ -59,7 +59,7 @@ public class UsersResource {
 
 				Iterable<AnonymousUser> found =
                         auCollection.find("{deviceAccount.deviceUUID:#, deviceAccount.key:#}",deviceUUID, key)
-                                    .sort("{latestActiveTimeStamp : 1}")
+                                    .sort("{joinedTimeStamp : -1}")
                                     .limit(1)
                                     .as(AnonymousUser.class);
 
