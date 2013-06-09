@@ -67,6 +67,7 @@
 //        MongoDatabase.ConnectToDb();
 //
 //        try {
+//
 //            Root root = new Root();
 //
 //            DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
@@ -92,6 +93,33 @@
 //
 //            //**(Set tracking on bike rides: 2 DB call)
 //            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
+//
+////            Root root = new Root();
+////
+////            DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
+////            Long yesterday = todayDateTime.minusDays(1).getMillis();  //
+////            MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
+////
+////            Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
+////            root.ClosestLocation = closestLocation;
+////            root.BikeRides = new ArrayList<BikeRide>();
+////
+////            if(closestLocation==null) {
+////                root.ClosestLocation = new Location();
+////                root.ClosestLocation.geoLoc = new GeoLoc();
+////                Iterable<BikeRide> bikeRides = getRidesFromDB(yesterday, bikeCollection);
+////
+////                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
+////            } else {
+////                //**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
+////                //Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
+////                Iterable<BikeRide> bikeRides = getRidesFromDB(root.ClosestLocation.id, yesterday, bikeCollection);
+////                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
+////            }
+////
+////            //**(Set tracking on bike rides: 2 DB call)
+////            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
+//            MongoDatabase.mongoClient.close();
 //            String test = "";
 //        }
 //        catch (Exception e)

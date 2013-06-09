@@ -100,7 +100,8 @@ public class DisplayByTimeResource {
 		{
             Root root = new Root();
 
-			DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
+            //We are no longer pushing back to midnight to clear up clutter on the client side (toDateMidnight().)
+			DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateTime(); // Joda time
 			Long yesterday = todayDateTime.minusDays(1).getMillis();  //
 			MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.BIKERIDES);
 
