@@ -79,6 +79,8 @@
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.0.1" level="project" />
     <orderEntry type="library" name="Maven: xpp3:xpp3:1.1.4c" level="project" />
+    <orderEntry type="library" name="Maven: com.thetransactioncompany:cors-filter:1.7" level="project" />
+    <orderEntry type="library" name="Maven: com.thetransactioncompany:java-property-utils:1.9" level="project" />
   </component>
 </module>
 
