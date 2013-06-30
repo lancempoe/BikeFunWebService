@@ -95,7 +95,7 @@ public class DisplayBySearchResource {
             for (Location location : locations) {
                 locationQuery += ", \"" + location.id + "\"";
             }
-            if (StringUtils.isNotBlank(locationQuery)){
+            if (StringUtils.isNotBlank(locationQuery) && locationQuery.length() >= 2){
                 locationQuery = locationQuery.substring(2);
             }
 			

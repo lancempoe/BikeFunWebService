@@ -66,7 +66,7 @@
 //
 //        Query query = new Query();
 //        query.query = "";
-//        query.city = "seattle";
+//        query.city = "p or";
 //        query.targetAudience = "";
 //
 ////        Root root  = webResource
@@ -104,7 +104,7 @@
 //            for (Location internal_location : locations) {
 //                locationQuery += ", \"" + internal_location.id + "\"";
 //            }
-//            if (StringUtils.isNotBlank(locationQuery)){
+//            if (StringUtils.isNotBlank(locationQuery) && locationQuery.length() >= 2){
 //                locationQuery = locationQuery.substring(2);
 //            }
 //
