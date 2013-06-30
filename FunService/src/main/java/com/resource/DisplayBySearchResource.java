@@ -95,7 +95,9 @@ public class DisplayBySearchResource {
             for (Location location : locations) {
                 locationQuery += ", \"" + location.id + "\"";
             }
-            locationQuery = locationQuery.substring(2);
+            if (StringUtils.isNotBlank(locationQuery)){
+                locationQuery = locationQuery.substring(2);
+            }
 			
 			DateTime filterStartDateTime = null;
 			DateTime filterEndDateTime = null;

@@ -57,15 +57,6 @@
 //		client.addFilter(new LoggingFilter());
 //		WebResource webResource = client.resource(REST_URI);
 //
-//		//CLEAR THE DB WARNING.....
-////		webResource
-////		.path("/WARNING/CLEAR_AND_RESET_DB")
-////		.type("application/json")
-////		.post(ClientResponse.class);
-////
-////		PopulateDB populate = new PopulateDB();
-////		populate.populateDB(webResource);
-//
 //		Location location = new Location();
 //		location.streetAddress = ("1000 SE Main St.");
 //		location.city = ("Portland");
@@ -75,7 +66,7 @@
 //
 //        Query query = new Query();
 //        query.query = "";
-//        query.city = "portland";
+//        query.city = "seattle";
 //        query.targetAudience = "";
 //
 ////        Root root  = webResource
@@ -87,42 +78,8 @@
 //
 //        try
 //        {
+//            //Copied from resource to directly test
 //            Root root = new Root();
-//
-//            BikeRide bikeRide = new BikeRide();
-//            Location location1 = new Location();
-//            location1.city = "PortlAND";
-//            location1.state = "Or";
-//            bikeRide.location = location1;
-//
-//            Location LOCALlocation = new Location();
-//            List<Location> LOCALlocations = new ArrayList<Location>();
-//
-//            StringBuilder stringBuilder = new StringBuilder();
-//            stringBuilder.append(bikeRide.location.city).append(", ").append(bikeRide.location.state);
-//            if (StringUtils.isNotBlank(bikeRide.location.country)) {
-//                stringBuilder.append(", ").append(bikeRide);
-//            }
-//
-//            //Check is current city exist
-//            MongoCollection locallocationCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.LOCATIONS);
-//            Iterable<Location> locallocationsIterable = locallocationCollection
-//                    .find("{formattedAddress: {$regex: '"+ stringBuilder.toString()+".*', $options: 'i'} }")
-//                    .limit(1)
-//                    .as(Location.class);
-//            LOCALlocations = Lists.newArrayList(locallocationsIterable);
-//
-//            if (LOCALlocations == null || LOCALlocations.size() == 0) {
-//                //Add new location to the DB
-//                String shit = "";
-//            } else {
-//                LOCALlocation = LOCALlocations.get(0);
-//            }
-//            bikeRide.cityLocationId = LOCALlocation.id;
-//
-//            MongoDatabase.mongoClient.close();
-//
-//
 //
 //            MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
 //
@@ -144,10 +101,12 @@
 //                        .as(Location.class);
 //                locations = Lists.newArrayList(locationsIterable);
 //            }
-//            for (Location myLocation : locations) {
-//                locationQuery += ", \"" + myLocation.id + "\"";
+//            for (Location internal_location : locations) {
+//                locationQuery += ", \"" + internal_location.id + "\"";
 //            }
-//            locationQuery = locationQuery.substring(2);
+//            if (StringUtils.isNotBlank(locationQuery)){
+//                locationQuery = locationQuery.substring(2);
+//            }
 //
 //            DateTime filterStartDateTime = null;
 //            DateTime filterEndDateTime = null;
@@ -183,6 +142,7 @@
 //
 //            //**(Set tracking on bike rides: 2 DB call)
 //            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
+//
 //        }
 //        catch (Exception e)
 //        {
