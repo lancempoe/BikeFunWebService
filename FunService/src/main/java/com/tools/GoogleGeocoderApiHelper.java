@@ -109,6 +109,17 @@ public class GoogleGeocoderApiHelper {
             Location location = new Location();
             List<Location> locations = new ArrayList<Location>();
 
+            //Polish location data
+            if (bikeRide.location.city != null) {
+                bikeRide.location.city = bikeRide.location.city.trim();
+            }
+            if (bikeRide.location.state != null) {
+                bikeRide.location.state = bikeRide.location.state.trim();
+            }
+            if (bikeRide.location.country != null) {
+                bikeRide.location.country = bikeRide.location.country.trim();
+            }
+
             //Build location
             StringBuilder addressAsBuilder = new StringBuilder();
             addressAsBuilder.append(bikeRide.location.city).append(", ").append(bikeRide.location.state);
@@ -130,8 +141,20 @@ public class GoogleGeocoderApiHelper {
 				location.state = (bikeRide.location.state);
 				location.country = (bikeRide.location.country);
 				GoogleGeocoderApiHelper.setGeoLocation(location); //Call API for city center geoCode
-				MongoCollection collection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
-				collection.save(location);
+
+                //Validate that returned location is not in our DB.
+                locationsIterable = locationCollection
+                        .find("{formattedAddress: {$regex: '"+location.formattedAddress+".*', $options: 'i'} }")
+                        .limit(1)
+                        .as(Location.class);
+                locations = Lists.newArrayList(locationsIterable);
+
+                if (locations == null || locations.size() == 0) {
+                    locationCollection.save(location);
+                } else {
+                    location = locations.get(0);
+                }
+
 			} else {
                 location = locations.get(0);
             }

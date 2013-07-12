@@ -2,6 +2,7 @@
 //
 //import com.db.MongoDatabase;
 //import com.model.*;
+//import com.resource.BikeRidesResource;
 //import com.settings.SharedStaticValues;
 //import com.sun.jersey.api.client.ClientResponse;
 //import com.tools.CommonBikeRideCalls;
@@ -49,72 +50,72 @@
 //		return cc;
 //	}
 //
-//    @Test
-//    public void testGetBikeRide() {
-//
-//        try {
-////            Client client = Client.create(getDefaultClientConfig());
-////            client.addFilter(new LoggingFilter());
-////            WebResource webResource = client.resource(REST_URI);
-//
-//            MongoDatabase.ConnectToDb();
-//
-//            String clientId = "5192642a0364eb6f86974361";
-//
-//
-//            Location geolocation = new Location();
-//            geolocation.streetAddress = ("1000 SE Main St.");
-//            geolocation.city = ("Portland");
-//            geolocation.state = ("OR");
-//            GoogleGeocoderApiHelper.setGeoLocation(geolocation);
-//            GeoLoc geoLoc = geolocation.geoLoc;
-//
-//
-//            try
-//            {
-//                BikeRide bikeRide = null;
-//
-//                //Get the object using Jongo
-//                MongoCollection collection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
-//                bikeRide = collection.findOne(new ObjectId("519edfcb036493a80d72345d")).as(BikeRide.class);
-//
-//                //build tracking items.
-//                if (bikeRide != null) {
-//                    bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
-//
-//                    //Clear out all clientId tracks... They won't need to see their own tracks.. clutters the screen.
-//                    if (bikeRide.rideLeaderTracking!=null && bikeRide.rideLeaderTracking.trackingUserName.equals(clientId)) {
-//                        bikeRide.rideLeaderTracking = null;
-//                    }
-//                    List<Tracking> trackings = new ArrayList<Tracking>();
-//
-//                    if (bikeRide.currentTrackings != null) {
-//                        for (Tracking tracking : bikeRide.currentTrackings) {
-//                            if (!tracking.trackingUserId.equals(clientId)) {
-//                                trackings.add(tracking);
-//                            }
-//                        }
-//                    }
-//                    bikeRide.currentTrackings = trackings;
-//
-//                }
-//            }
-//            catch (Exception e)
-//            {
-//                e.printStackTrace();
-//            }
-//
-//
-//
-//            MongoDatabase.mongoClient.close();
-//
-//            String test = "";
-//
-//        } catch (Exception e) {
-//            String test = "";
-//        }
-//
-//    }
+////    @Test
+////    public void testGetBikeRide() {
+////
+////        try {
+//////            Client client = Client.create(getDefaultClientConfig());
+//////            client.addFilter(new LoggingFilter());
+//////            WebResource webResource = client.resource(REST_URI);
+////
+////            MongoDatabase.ConnectToDb();
+////
+////            String clientId = "5192642a0364eb6f86974361";
+////
+////
+////            Location geolocation = new Location();
+////            geolocation.streetAddress = ("1000 SE Main St.");
+////            geolocation.city = ("Portland");
+////            geolocation.state = ("OR");
+////            GoogleGeocoderApiHelper.setGeoLocation(geolocation);
+////            GeoLoc geoLoc = geolocation.geoLoc;
+////
+////
+////            try
+////            {
+////                BikeRide bikeRide = null;
+////
+////                //Get the object using Jongo
+////                MongoCollection collection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
+////                bikeRide = collection.findOne(new ObjectId("519edfcb036493a80d72345d")).as(BikeRide.class);
+////
+////                //build tracking items.
+////                if (bikeRide != null) {
+////                    bikeRide = CommonBikeRideCalls.postBikeRideDBUpdates(bikeRide, geoLoc);
+////
+////                    //Clear out all clientId tracks... They won't need to see their own tracks.. clutters the screen.
+////                    if (bikeRide.rideLeaderTracking!=null && bikeRide.rideLeaderTracking.trackingUserName.equals(clientId)) {
+////                        bikeRide.rideLeaderTracking = null;
+////                    }
+////                    List<Tracking> trackings = new ArrayList<Tracking>();
+////
+////                    if (bikeRide.currentTrackings != null) {
+////                        for (Tracking tracking : bikeRide.currentTrackings) {
+////                            if (!tracking.trackingUserId.equals(clientId)) {
+////                                trackings.add(tracking);
+////                            }
+////                        }
+////                    }
+////                    bikeRide.currentTrackings = trackings;
+////
+////                }
+////            }
+////            catch (Exception e)
+////            {
+////                e.printStackTrace();
+////            }
+////
+////
+////
+////            MongoDatabase.mongoClient.close();
+////
+////            String test = "";
+////
+////        } catch (Exception e) {
+////            String test = "";
+////        }
+////
+////    }
 //
 ////	@Test
 ////	public void testDisplayBikeRide() {
@@ -311,53 +312,50 @@
 ////        }
 ////    }
 ////
-////	@Test
-////	public void testFunServiceNewBikeRide() {
-////		try {
-////			Client client = Client.create(getDefaultClientConfig());
-////			client.addFilter(new LoggingFilter());
-////			WebResource webResource = client.resource(REST_URI);
-////
-////			//setup
-////			DateTime now = new DateTime();
-////
-////			//Add a few Bike Rides with userId
-////			BikeRide bikeRide = new BikeRide();
-////			bikeRide.bikeRideName = "1: One Day in the Future Ride: Apple ride";
-////
-////			Long future = now.plusDays(1).getMillis();  //
-////			bikeRide.rideStartTime = future;
-////			bikeRide.details = "You need to come and eat these pears?";
-////			bikeRide.rideLeaderId = "123456789";
-////			Location location = new Location();
-////			location.streetAddress = ("1500 SE Ash St.");
-////			location.city = ("Portland");
-////			location.state = ("OR");
-////			bikeRide.location = location;
-////            bikeRide.imagePath = "test.jpg";
-////
-////
-////            //Save the resized image
-////            int i = bikeRide.imagePath.lastIndexOf('.');
-////            String extention = bikeRide.imagePath.substring(i+1);
-////
-////
-////            ClientResponse response = webResource
-////					.path("bikerides/new")
-////					.type("application/json")
-////					.post(ClientResponse.class, bikeRide);
-////
-////            final int statusCode = response.getStatus();
-////            if ((statusCode < 200) || (statusCode >= 300)) {
-////                String message = "What?!?!";
-////            }
-////            bikeRide = response.getEntity(BikeRide.class);
-////
-////			assertTrue(bikeRide.imagePath == "something different");
-////		} catch (Exception e) {
-////			e.printStackTrace();
-////		}
-////	}
+//	@Test
+//	public void testFunServiceNewBikeRide() {
+//
+//		try {
+//            MongoDatabase.ConnectToDb();
+//
+//            //Creating phone details.
+//            String clientId = "5192642a0364eb6f86974361";
+//            Location geolocation = new Location();
+//            geolocation.streetAddress = ("1000 SE Main St.");
+//            geolocation.city = ("Portland");
+//            geolocation.state = ("OR");
+//            GoogleGeocoderApiHelper.setGeoLocation(geolocation);
+//            GeoLoc geoLoc = geolocation.geoLoc;
+//
+//            //Build Bike Ride
+//			DateTime now = new DateTime();
+//
+//			//Add a few Bike Rides with userId
+//			BikeRide bikeRide = new BikeRide();
+//			bikeRide.bikeRideName = "1: One Day in the Future Ride: Apple ride";
+//
+//			Long future = now.plusDays(1).getMillis();  //
+//			bikeRide.rideStartTime = future;
+//			bikeRide.details = "You need to come and eat these pears?";
+//			bikeRide.rideLeaderId = "123456789";
+//			Location location = new Location();
+//			location.streetAddress = ("1500 SE Ash St.");
+//			location.city = ("porTLANd ");
+//			location.state = ("Oregon ");
+//			bikeRide.location = location;
+//
+//            //This data comes out of
+//            BikeRidesResource brr = new BikeRidesResource();
+//            Response response = brr.newBikeRide(bikeRide, geoLoc.latitude, geoLoc.longitude);
+//
+//            String test = "";
+//
+//
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 ////
 ////	@Test
 ////	public void testFunServiceNewAndUpdateBikeRide() {
