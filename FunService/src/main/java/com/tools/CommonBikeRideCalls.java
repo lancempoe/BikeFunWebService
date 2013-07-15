@@ -5,6 +5,7 @@ import com.db.MongoDatabase.MONGO_COLLECTIONS;
 import com.model.BikeRide;
 import com.model.GeoLoc;
 import com.model.Location;
+import com.settings.SharedStaticValues;
 import org.bson.types.ObjectId;
 import org.jongo.MongoCollection;
 
@@ -18,6 +19,8 @@ import java.util.List;
  */
 public class CommonBikeRideCalls {
 
+    private static final int RADIUS_IN_MILES = 60; //This is the max distance that we will pull for active rides.
+
 	/**
 	 * Identify the closest city to the client with an upcoming ride
 	 * Query all BikeRide.LocationId for rides starting yesterday 12am through the future.  
@@ -28,27 +31,53 @@ public class CommonBikeRideCalls {
 	 * @throws Exception 
 	 */
 	public static Location getClosestActiveLocation(GeoLoc geoLoc, MongoCollection bikeCollection, Long yesterday) throws Exception {
-		Iterable<String> all = bikeCollection
-				.distinct("cityLocationId")
-				.query("{rideStartTime: {$gt: #}}", 
-						yesterday)
-						.as(String.class);
-		ArrayList<ObjectId> locationIds = new ArrayList<ObjectId>();
-		for(String locationId : all) {
-			locationIds.add(new ObjectId(locationId));
-		}
+
+        //ADD ensure index if we want to add max distance to query.  That might speed up the query
+        Iterable<String> all = bikeCollection
+                .distinct("cityLocationId")
+                .query("{rideStartTime: {$gt: #}}",
+                        yesterday)
+                .as(String.class);
+        ArrayList<ObjectId> locationIds = new ArrayList<ObjectId>();
+        for(String locationId : all) {
+            locationIds.add(new ObjectId(locationId));
+        }
 
 		Location closestLocation;
 		MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "geoLoc");
-		//coll.ensureIndex("{geoLoc: '2d'}") is set when getting the collection
-		closestLocation = locationCollection
-				.findOne("{geoLoc: {$near: [#, #]}, _id: {$in:#}}", 
+
+        closestLocation = locationCollection
+				.findOne("{geoLoc: {$near: [#, #], $maxDistance: #}, _id: {$in: #}}",
 						geoLoc.longitude,
 						geoLoc.latitude,
+                        RADIUS_IN_MILES/SharedStaticValues.ONE_DEGREE_IN_MILES,
 						locationIds)
 						.as(Location.class);
+
+        //If there are not active rides near the client return the closest city in our system.
+        if (closestLocation == null) {
+            closestLocation = getClosestLocation(geoLoc);
+        }
+
 		return closestLocation;
 	}
+
+    /**
+     * Identify the closest city to the client regardless of any rides.
+     *
+     * @return Location
+     * @throws Exception
+     */
+    public static Location getClosestLocation(GeoLoc geoLoc) throws Exception {
+        //**(Identify the closest city to the client: 1 DB Call)**
+        MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "geoLoc");
+        Location closestLocation = locationCollection
+                .findOne("{geoLoc: {$near: [#, #]}}",
+                        geoLoc.longitude,
+                        geoLoc.latitude)
+                .as(Location.class);
+        return closestLocation;
+    }
 
     public static BikeRide postBikeRideDBUpdates(BikeRide bikeRide, GeoLoc geoLoc) throws Exception {
 

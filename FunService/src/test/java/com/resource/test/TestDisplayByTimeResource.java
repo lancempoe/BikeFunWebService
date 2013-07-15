@@ -6,6 +6,7 @@
 //import com.model.GeoLoc;
 //import com.model.Location;
 //import com.model.Root;
+//import com.resource.DisplayByTimeResource;
 //import com.settings.SharedStaticValues;
 //import com.sun.jersey.api.client.Client;
 //import com.sun.jersey.api.client.ClientResponse;
@@ -51,92 +52,26 @@
 //		client.addFilter(new LoggingFilter());
 //		WebResource webResource = client.resource(REST_URI);
 //
-//		//		//CLEAR THE DB WARNING.....
-//		//		webResource
-//		//		.path("/WARNING/CLEAR_AND_RESET_DB")
-//		//		.type("application/json")
-//		//		.post(ClientResponse.class);
-//
 //		Location location = new Location();
-//		location.streetAddress = ("1000 SE Main St.");
-//		location.city = ("Portland");
-//		location.state = ("OR");
+//		location.streetAddress = ("1000 Main St.");
+//		location.city = ("seattle");
+//		location.state = ("wa");
 //		GoogleGeocoderApiHelper.setGeoLocation(location);
 //        GeoLoc geoLoc = location.geoLoc;
 //
 //        MongoDatabase.ConnectToDb();
-//
 //        try {
-//
-//            Root root = new Root();
-//
-//            DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
-//            Long yesterday = todayDateTime.minusDays(1).getMillis();  //
-//            MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
-//
-//            Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
-//            root.ClosestLocation = closestLocation;
-//            root.BikeRides = new ArrayList<BikeRide>();
-//
-//            if(closestLocation==null) {
-//                root.ClosestLocation = new Location();
-//                root.ClosestLocation.geoLoc = new GeoLoc();
-//                Iterable<BikeRide> bikeRides = getRidesFromDB(yesterday, bikeCollection);
-//
-//                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
-//            } else {
-//                //**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
-//                //Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
-//                Iterable<BikeRide> bikeRides = getRidesFromDB(root.ClosestLocation.id, yesterday, bikeCollection);
-//                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
-//            }
-//
-//            //**(Set tracking on bike rides: 2 DB call)
-//            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
-//
-////            Root root = new Root();
-////
-////            DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
-////            Long yesterday = todayDateTime.minusDays(1).getMillis();  //
-////            MongoCollection bikeCollection = MongoDatabase.Get_DB_Collection(MongoDatabase.MONGO_COLLECTIONS.BIKERIDES);
-////
-////            Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
-////            root.ClosestLocation = closestLocation;
-////            root.BikeRides = new ArrayList<BikeRide>();
-////
-////            if(closestLocation==null) {
-////                root.ClosestLocation = new Location();
-////                root.ClosestLocation.geoLoc = new GeoLoc();
-////                Iterable<BikeRide> bikeRides = getRidesFromDB(yesterday, bikeCollection);
-////
-////                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
-////            } else {
-////                //**(Identify the upcoming bike rides for the selected city: 1 DB Call)**
-////                //Find all bike rides for the selected city (if user has default it may not be in the list of locations available.  different ways to display on the UI)
-////                Iterable<BikeRide> bikeRides = getRidesFromDB(root.ClosestLocation.id, yesterday, bikeCollection);
-////                root.BikeRides.addAll(Lists.newArrayList(bikeRides));
-////            }
-////
-////            //**(Set tracking on bike rides: 2 DB call)
-////            root.BikeRides = CommonBikeRideCalls.postBikeRideDBUpdates(root.BikeRides, geoLoc);
-//            MongoDatabase.mongoClient.close();
+//            DisplayByTimeResource displayByTimeResource = new DisplayByTimeResource();
+//            Response response = displayByTimeResource.getDisplay(geoLoc.latitude, geoLoc.longitude);
 //            String test = "";
 //        }
 //        catch (Exception e)
 //        {
 //            e.printStackTrace();
 //        }
+//        MongoDatabase.mongoClient.close();
 //
-////        ClientResponse response = webResource
-////				.path("display/by_time_of_day/geoloc="+ location.geoLoc.latitude + "," + location.geoLoc.longitude)
-////				.type("application/json")
-////				.get(ClientResponse.class);
-////
-////        final int statusCode = response.getStatus();
-////        if ((statusCode < 200) || (statusCode >= 300)) {
-////            String message = "What?!?!";
-////        }
-////        Root root = response.getEntity(Root.class);
+//
 //
 //	}
 //

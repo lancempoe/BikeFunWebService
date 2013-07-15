@@ -13,4 +13,6 @@ public class SharedStaticValues {
 
     public static final String MAIN_PAGE_DISPLAY_FIELDS = "{totalPeopleTrackingCount: 0, currentTrackings: 0, currentlyTracking: 0, imagePath: 0}";
 
+    public static final Double ONE_DEGREE_IN_MILES = 69.11; //1 degree of latitude = about 69.11 miles.
+
 }

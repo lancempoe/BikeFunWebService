@@ -36,7 +36,6 @@ public class DisplayByProximityResource {
 
     private static final Log LOG = LogFactory.getLog(DisplayByProximityResource.class);
 
-	private static final Double ONE_DEGREE_IN_MILES = 69.11; //1 degree of latitude = about 69.11 miles.
 	private static final int RADIUS_IN_MILES = 3;
 	private static final int TIME_IN_MINUTES = 60;
 
@@ -80,15 +79,7 @@ public class DisplayByProximityResource {
 		{
             Root root = new Root();
 
-            //**(Identify the closest city to the client: 1 DB Call)**
-			MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS, "geoLoc");
-			//coll.ensureIndex("{geoLoc: '2d'}") is set when getting the collection
-			Location closestLocation = locationCollection
-					.findOne("{geoLoc: {$near: [#, #]}}", 
-							geoLoc.longitude, 
-							geoLoc.latitude)
-					.as(Location.class);
-			root.ClosestLocation = closestLocation;
+            root.ClosestLocation = CommonBikeRideCalls.getClosestLocation(geoLoc);
 
 			//**(Get BikeRide list: 3 calls to the DB)**
 			DateTime nowDateTime = new DateTime(DateTimeZone.UTC); // Joda time
@@ -107,7 +98,7 @@ public class DisplayByProximityResource {
 					.find("{location.geoLoc: {$near: [#, #], $maxDistance: #}, rideStartTime: {$lte: #, $gte: #}}",
 							geoLoc.longitude,
 							geoLoc.latitude,
-							RADIUS_IN_MILES/ONE_DEGREE_IN_MILES,
+							RADIUS_IN_MILES/SharedStaticValues.ONE_DEGREE_IN_MILES,
 							max ,
 							min )
 					.fields(SharedStaticValues.MAIN_PAGE_DISPLAY_FIELDS)

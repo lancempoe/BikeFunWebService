@@ -76,13 +76,7 @@ public class DisplayBySearchResource {
 
             List<Location> locations = new ArrayList<Location>();
             String locationQuery = "";
-			if (StringUtils.isEmpty(query.city)) {
-                DateTime todayDateTime = new DateTime().withZone(DateTimeZone.UTC).toDateMidnight().toDateTime(); // Joda time
-                Long yesterday = todayDateTime.minusDays(1).getMillis();
-                Location closestLocation = CommonBikeRideCalls.getClosestActiveLocation(geoLoc, bikeCollection, yesterday);
-                root.ClosestLocation = closestLocation;
-                locations.add(closestLocation);
-			} else {
+			if (StringUtils.isNotBlank(query.city)) {
                 MongoCollection locationCollection = MongoDatabase.Get_DB_Collection(MONGO_COLLECTIONS.LOCATIONS);
 
                 ///Find all matching locations
