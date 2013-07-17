@@ -142,7 +142,7 @@ public class GoogleGeocoderApiHelper {
 				location.country = (bikeRide.location.country);
 				GoogleGeocoderApiHelper.setGeoLocation(location); //Call API for city center geoCode
 
-                //Validate that returned location is not in our DB.
+                //Recheck after pulling back google result to make sure that prior google result is not in our system.
                 locationsIterable = locationCollection
                         .find("{formattedAddress: {$regex: '"+location.formattedAddress+".*', $options: 'i'} }")
                         .limit(1)
