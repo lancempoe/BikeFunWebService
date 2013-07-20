@@ -81,7 +81,7 @@ public class DisplayBySearchResource {
 
                 ///Find all matching locations
                 Iterable<Location> locationsIterable = locationCollection
-                        .find("{ city: {$regex: '.*"+query.city +".*', $options: 'i'}}")
+                        .find("{ city: {$regex: '.*"+query.city.trim() +".*', $options: 'i'}}")
                         .limit(200)
                         .as(Location.class);
                 locations = Lists.newArrayList(locationsIterable);
@@ -110,7 +110,7 @@ public class DisplayBySearchResource {
             //Build the query
             String queryAsString = "{$and: [ ";
             if(StringUtils.isNotBlank(query.rideLeaderId)) { queryAsString += "{rideLeaderId: '" + query.rideLeaderId+"'}, "; }
-            if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [ { bikeRideName: {$regex: '.*"+query.query+".*', $options: 'i'} }, {details: {$regex: '.*"+query.query+".*', $options: 'i'} } ] }, "; }
+            if(StringUtils.isNotBlank(query.query)) { queryAsString += "{$or: [ { bikeRideName: {$regex: '.*"+query.query.trim()+".*', $options: 'i'} }, {details: {$regex: '.*"+query.query+".*', $options: 'i'} } ] }, "; }
             if(StringUtils.isNotBlank(query.city)) { queryAsString += "{cityLocationId: {$all: [ " + locationQuery + " ] } }, "; }
             if(StringUtils.isNotBlank(query.targetAudience)) { queryAsString += "{targetAudience: '" + query.targetAudience+"'}, "; }
             if (filterEndDateTime != null) { queryAsString += "{rideStartTime: {$lte: "+filterEndDateAsMilliSeconds+", $gte: "+filterStartDateAsMilliSeconds+"} }, "; }
