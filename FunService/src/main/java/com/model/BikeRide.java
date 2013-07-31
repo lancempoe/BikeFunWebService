@@ -31,7 +31,8 @@ public class BikeRide {
 	public Double distanceFromClient;
 	public boolean currentlyTracking = false; //Default value
 	public long totalPeopleTrackingCount = 0; //Default value
-	
+    public Double distanceTrackFromClient;
+
 	//Generated and sent back to ride page.  Not saved in same collection
 	public Tracking rideLeaderTracking;
 	public List<Tracking> currentTrackings = new ArrayList<Tracking>();

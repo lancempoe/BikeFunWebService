@@ -88,8 +88,20 @@ public class CommonBikeRideCalls {
         //Get leader tracking
         bikeRide.rideLeaderTracking = TrackingHelper.getRideLeaderTracking(bikeRide);
 
+        //Set the distance from the leader
+        if (bikeRide.rideLeaderTracking != null) {
+            bikeRide.distanceTrackFromClient = GoogleGeocoderApiHelper.distFrom(bikeRide.rideLeaderTracking.geoLoc, geoLoc); //TODO REPLACE ONCE JONGO .4 IS USED.
+        }
+
         //Get all current tracks
         bikeRide.currentTrackings = TrackingHelper.getAllCurrentTrackings(bikeRide);
+
+        //Set the distance from the participant if needed
+        if (bikeRide.distanceTrackFromClient == null &&
+                bikeRide.currentTrackings != null &&
+                bikeRide.currentTrackings.size() > 0) {
+            bikeRide.distanceTrackFromClient = GoogleGeocoderApiHelper.distFrom(bikeRide.currentTrackings.get(0).geoLoc, geoLoc); //TODO REPLACE ONCE JONGO .4 IS USED.
+        }
 
         return bikeRide;
     }
