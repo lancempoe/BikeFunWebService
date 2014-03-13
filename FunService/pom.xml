@@ -99,11 +99,11 @@
 			<artifactId>google-api-services-oauth2</artifactId>
 			<version>v2-rev32-1.14.1-beta</version>
 		</dependency>
-		<dependency>
-			<groupId>com.thetransactioncompany</groupId>
-			<artifactId>cors-filter</artifactId>
-			<version>1.7</version>
-		</dependency>
+        <dependency>
+            <groupId>org.ebaysf.web</groupId>
+            <artifactId>cors-filter</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 	</dependencies>
 	<build>
 		<finalName>FunService</finalName>
