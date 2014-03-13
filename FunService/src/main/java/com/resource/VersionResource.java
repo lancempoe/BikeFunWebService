@@ -17,7 +17,7 @@ import javax.ws.rs.core.Response;
 @Path("/api")
 @Produces(MediaType.APPLICATION_JSON)
 public class VersionResource {
-    private static final String apiVersion = "1.0.1";
+    private static final String apiVersion = "1.0.2";
     private static final String releaseDate = Long.toString(DateTime.now().getMillis());
     private static final String versionIdentifier = apiVersion + "-" + releaseDate;
 
